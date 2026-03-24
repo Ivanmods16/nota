@@ -612,11 +612,11 @@
     return new Promise((resolve, reject) => {
       // Cargar Firebase App
       const appScript = document.createElement('script');
-      appScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
+      appScript.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js';
       appScript.onload = () => {
         // Cargar Firebase Database
         const dbScript = document.createElement('script');
-        dbScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js';
+        dbScript.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js';
         dbScript.onload = () => {
           resolve();
         };
@@ -628,104 +628,56 @@
     });
   }
 
-  // Inicializar Firebase después de cargar
-  loadFirebase().then(() => {
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+  // Esperar a que el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+  } else {
+    initApp();
+  }
 
-    // Estado de conexión
-    let firebaseConnected = false;
-    let firebaseSyncing = false;
-
-    function updateStatusIndicator(status, message) {
-      const indicator = document.getElementById('statusIndicator');
-      if (!indicator) return;
-
-      indicator.className = 'status-indicator';
-      if (status === 'online') {
-        indicator.classList.add('status-online');
-        indicator.textContent = '🟢 Online';
-      } else if (status === 'offline') {
-        indicator.classList.add('status-offline');
-        indicator.textContent = '🔴 Offline';
-      } else if (status === 'syncing') {
-        indicator.classList.add('status-syncing');
-        indicator.textContent = '🔄 Sincronizando...';
-      }
+  function initApp() {
+    // Estado inicial del indicador
+    const statusIndicator = document.getElementById('statusIndicator');
+    if (statusIndicator) {
+      statusIndicator.textContent = '🔄 Cargando Firebase...';
+      statusIndicator.className = 'status-indicator status-syncing';
     }
 
-    // ── DATOS ────────────────────────────────────────────────
+    // Inicializar Firebase después de cargar
+    loadFirebase().then(() => {
+      try {
+        // Verificar si Firebase ya está inicializado
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
+      // Estado de conexión
+      let firebaseConnected = false;
+      let firebaseSyncing = false;
+
+      function updateStatusIndicator(status, message) {
+        const indicator = document.getElementById('statusIndicator');
+        if (!indicator) return;
+
+        indicator.className = 'status-indicator';
+        if (status === 'online') {
+          indicator.classList.add('status-online');
+          indicator.textContent = '🟢 Online';
+        } else if (status === 'offline') {
+          indicator.classList.add('status-offline');
+          indicator.textContent = '🔴 Offline';
+        } else if (status === 'syncing') {
+          indicator.classList.add('status-syncing');
+          indicator.textContent = '🔄 Sincronizando...';
+        }
+      }
+
+// ── DATOS ────────────────────────────────────────────────
     let usuarios = [
       { usuario: 'admin', pass: '1234', saldo: 0,      rol: 'admin'   },
       { usuario: 'ivan',  pass: '123',  saldo: 100000, rol: 'usuario' },
     ];
-
-    function cargarUsuarios() {
-      updateStatusIndicator('syncing', 'Cargando datos...');
-      const usuariosRef = database.ref('usuarios');
-      usuariosRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          usuarios = Object.values(data);
-          console.log('Usuarios cargados desde Firebase:', usuarios);
-          firebaseConnected = true;
-          updateStatusIndicator('online', 'Conectado');
-          // Actualizar panel admin si está abierto
-          if (document.getElementById('adminPanel').style.display === 'block') {
-            renderAdmin();
-          }
-        } else {
-          // Si no hay datos, subir los usuarios iniciales
-          guardarUsuarios();
-        }
-      }, (error) => {
-        console.error('Error cargando usuarios:', error);
-        firebaseConnected = false;
-        updateStatusIndicator('offline', 'Sin conexión');
-        // Fallback a localStorage si Firebase falla
-        try {
-          const data = localStorage.getItem('blackcasinoUsuarios');
-          if (data) usuarios = JSON.parse(data);
-        } catch (e) {
-          console.warn('No se pudo cargar usuarios de localStorage', e);
-        }
-      });
-    }
-
-    function guardarUsuarios() {
-      if (!firebaseConnected) {
-        updateStatusIndicator('offline', 'Sin conexión - guardando localmente');
-        localStorage.setItem('blackcasinoUsuarios', JSON.stringify(usuarios));
-        return;
-      }
-
-      updateStatusIndicator('syncing', 'Guardando...');
-      const usuariosRef = database.ref('usuarios');
-      const usuariosObj = {};
-      usuarios.forEach((user, index) => {
-        usuariosObj[index] = user;
-      });
-      usuariosRef.set(usuariosObj)
-        .then(() => {
-          updateStatusIndicator('online', 'Guardado');
-          setTimeout(() => updateStatusIndicator('online', 'Conectado'), 2000);
-        })
-        .catch((error) => {
-          console.error('Error guardando usuarios:', error);
-          updateStatusIndicator('offline', 'Error al guardar');
-          // Fallback a localStorage
-          localStorage.setItem('blackcasinoUsuarios', JSON.stringify(usuarios));
-        });
-    }
-
-    cargarUsuarios();
-
-    // Verificar conexión periódicamente
-    setInterval(() => {
-      if (!firebaseConnected) {
-        updateStatusIndicator('offline', 'Sin conexión');
-      }
-    }, 30000); // Cada 30 segundos
 
     // ── ESTADO ───────────────────────────────────────────────
     let currentUser = null;
@@ -740,6 +692,81 @@
     const POS_ARQUERO = { izq: '10%', centro: 'calc(50% - 20px)', der: 'calc(90% - 40px)' };
     const POS_BALON   = { izq: '15%', centro: 'calc(50% - 26px)', der: 'calc(75% - 26px)' };
 
+    function cargarUsuarios() {
+      updateStatusIndicator('syncing', 'Cargando datos...');
+      console.log('Intentando conectar a Firebase...');
+      const usuariosRef = database.ref('usuarios');
+      
+      // Usar once() en lugar de on() para evitar problemas de conexión
+      usuariosRef.once('value')
+        .then((snapshot) => {
+          console.log('Conexión exitosa a Firebase');
+          const data = snapshot.val();
+          if (data) {
+            usuarios = Object.values(data);
+            console.log('Usuarios cargados desde Firebase:', usuarios);
+            firebaseConnected = true;
+            updateStatusIndicator('online', 'Conectado');
+            // Actualizar panel admin si está abierto
+            if (document.getElementById('adminPanel').style.display === 'block') {
+              renderAdmin();
+            }
+          } else {
+            console.log('No hay datos, inicializando...');
+            // Si no hay datos, subir los usuarios iniciales
+            guardarUsuarios();
+          }
+        })
+        .catch((error) => {
+          console.error('Error cargando usuarios:', error);
+          console.error('Código de error:', error.code);
+          console.error('Mensaje de error:', error.message);
+          firebaseConnected = false;
+          updateStatusIndicator('offline', 'Sin conexión');
+          // Fallback a localStorage si Firebase falla
+          try {
+            const data = localStorage.getItem('blackcasinoUsuarios');
+            if (data) {
+              usuarios = JSON.parse(data);
+              console.log('Cargado desde localStorage');
+            }
+          } catch (e) {
+            console.warn('Error cargando localStorage:', e);
+          }
+        });
+    }
+
+    function guardarUsuarios() {
+      if (!firebaseConnected) {
+        updateStatusIndicator('offline', 'Sin conexión - guardando localmente');
+        localStorage.setItem('blackcasinoUsuarios', JSON.stringify(usuarios));
+        return;
+      }
+
+      updateStatusIndicator('syncing', 'Guardando...');
+      console.log('Guardando usuarios en Firebase...');
+      const usuariosRef = database.ref('usuarios');
+      const usuariosObj = {};
+      usuarios.forEach((user, index) => {
+        usuariosObj[index] = user;
+      });
+      
+      usuariosRef.set(usuariosObj)
+        .then(() => {
+          console.log('Usuarios guardados exitosamente en Firebase');
+          updateStatusIndicator('online', 'Guardado');
+          setTimeout(() => updateStatusIndicator('online', 'Conectado'), 2000);
+        })
+        .catch((error) => {
+          console.error('Error guardando usuarios:', error);
+          console.error('Código de error:', error.code);
+          console.error('Mensaje de error:', error.message);
+          updateStatusIndicator('offline', 'Error al guardar');
+          // Fallback a localStorage
+          localStorage.setItem('blackcasinoUsuarios', JSON.stringify(usuarios));
+        });
+    }
+
     // ── LOGIN ─────────────────────────────────────────────────
     document.addEventListener('keydown', e => {
       if (e.key === 'Enter' && document.getElementById('login').style.display !== 'none') {
@@ -752,7 +779,7 @@
     function switchTab(tab) {
       document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.login-form').forEach(f => f.classList.remove('active'));
-
+      
       if (tab === 'login') {
         document.querySelector('.login-tab:nth-child(1)').classList.add('active');
         document.getElementById('loginForm').classList.add('active');
@@ -771,7 +798,7 @@
       const p = document.getElementById('newPass').value;
       const p2 = document.getElementById('newPass2').value;
       const err = document.getElementById('signupErr');
-
+      
       if (!u || !p || !p2) {
         err.textContent = 'Por favor completa todos los campos.';
         return;
@@ -788,7 +815,7 @@
         err.textContent = 'Este usuario ya existe.';
         return;
       }
-
+      
       usuarios.push({ usuario: u, pass: p, saldo: 0, rol: 'usuario' });
       guardarUsuarios();
       err.textContent = '';
@@ -1060,11 +1087,18 @@
       });
     }
 
-  }).catch((error) => {
-    console.error('Error cargando Firebase:', error);
-    document.getElementById('statusIndicator').textContent = '🔴 Error Firebase';
-    document.getElementById('statusIndicator').className = 'status-indicator status-offline';
-  });
+    // Iniciar carga de datos DESPUÉS de definir todas las funciones
+    cargarUsuarios();
+
+    }).catch((error) => {
+      console.error('Error cargando Firebase:', error);
+      const indicator = document.getElementById('statusIndicator');
+      if (indicator) {
+        indicator.textContent = '🔴 Error Firebase';
+        indicator.className = 'status-indicator status-offline';
+      }
+    });
+  }
 </script>
 </body>
 </html>
