@@ -595,15 +595,8 @@
   <button class="btn-logout" style="margin-top:16px" onclick="logout()">Cerrar sesión</button>
 </div>
 
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
+<script>
+  // Firebase SDK (versión sin módulos para mejor compatibilidad)
   const firebaseConfig = {
     apiKey: "AIzaSyB15Y32QkVMCx2LvR8AK6UGlcesIUHs3-Y",
     authDomain: "blackstore-99034.firebaseapp.com",
@@ -614,438 +607,464 @@
     measurementId: "G-Z9EJD0KC7M"
   };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
-
-  // Estado de conexión
-  let firebaseConnected = false;
-  let firebaseSyncing = false;
-
-  function updateStatusIndicator(status, message) {
-    const indicator = document.getElementById('statusIndicator');
-    if (!indicator) return;
-    
-    indicator.className = 'status-indicator';
-    if (status === 'online') {
-      indicator.classList.add('status-online');
-      indicator.textContent = '🟢 Online';
-    } else if (status === 'offline') {
-      indicator.classList.add('status-offline');
-      indicator.textContent = '🔴 Offline';
-    } else if (status === 'syncing') {
-      indicator.classList.add('status-syncing');
-      indicator.textContent = '🔄 Sincronizando...';
-    }
+  // Cargar Firebase dinámicamente
+  function loadFirebase() {
+    return new Promise((resolve, reject) => {
+      // Cargar Firebase App
+      const appScript = document.createElement('script');
+      appScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
+      appScript.onload = () => {
+        // Cargar Firebase Database
+        const dbScript = document.createElement('script');
+        dbScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js';
+        dbScript.onload = () => {
+          resolve();
+        };
+        dbScript.onerror = reject;
+        document.head.appendChild(dbScript);
+      };
+      appScript.onerror = reject;
+      document.head.appendChild(appScript);
+    });
   }
 
-  // ── DATOS ────────────────────────────────────────────────
-  // Podés agregar más usuarios acá
-  let usuarios = [
-    { usuario: 'admin', pass: '1234', saldo: 0,      rol: 'admin'   },
-    { usuario: 'ivan',  pass: '123',  saldo: 100000, rol: 'usuario' },
-  ];
+  // Inicializar Firebase después de cargar
+  loadFirebase().then(() => {
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
-  function cargarUsuarios() {
-    updateStatusIndicator('syncing', 'Cargando datos...');
-    const usuariosRef = ref(database, 'usuarios');
-    onValue(usuariosRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        usuarios = Object.values(data);
-        console.log('Usuarios cargados desde Firebase:', usuarios);
-        firebaseConnected = true;
-        updateStatusIndicator('online', 'Conectado');
-        // Actualizar panel admin si está abierto
-        if (document.getElementById('adminPanel').style.display === 'block') {
+    // Estado de conexión
+    let firebaseConnected = false;
+    let firebaseSyncing = false;
+
+    function updateStatusIndicator(status, message) {
+      const indicator = document.getElementById('statusIndicator');
+      if (!indicator) return;
+
+      indicator.className = 'status-indicator';
+      if (status === 'online') {
+        indicator.classList.add('status-online');
+        indicator.textContent = '🟢 Online';
+      } else if (status === 'offline') {
+        indicator.classList.add('status-offline');
+        indicator.textContent = '🔴 Offline';
+      } else if (status === 'syncing') {
+        indicator.classList.add('status-syncing');
+        indicator.textContent = '🔄 Sincronizando...';
+      }
+    }
+
+    // ── DATOS ────────────────────────────────────────────────
+    let usuarios = [
+      { usuario: 'admin', pass: '1234', saldo: 0,      rol: 'admin'   },
+      { usuario: 'ivan',  pass: '123',  saldo: 100000, rol: 'usuario' },
+    ];
+
+    function cargarUsuarios() {
+      updateStatusIndicator('syncing', 'Cargando datos...');
+      const usuariosRef = database.ref('usuarios');
+      usuariosRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          usuarios = Object.values(data);
+          console.log('Usuarios cargados desde Firebase:', usuarios);
+          firebaseConnected = true;
+          updateStatusIndicator('online', 'Conectado');
+          // Actualizar panel admin si está abierto
+          if (document.getElementById('adminPanel').style.display === 'block') {
+            renderAdmin();
+          }
+        } else {
+          // Si no hay datos, subir los usuarios iniciales
+          guardarUsuarios();
+        }
+      }, (error) => {
+        console.error('Error cargando usuarios:', error);
+        firebaseConnected = false;
+        updateStatusIndicator('offline', 'Sin conexión');
+        // Fallback a localStorage si Firebase falla
+        try {
+          const data = localStorage.getItem('blackcasinoUsuarios');
+          if (data) usuarios = JSON.parse(data);
+        } catch (e) {
+          console.warn('No se pudo cargar usuarios de localStorage', e);
+        }
+      });
+    }
+
+    function guardarUsuarios() {
+      if (!firebaseConnected) {
+        updateStatusIndicator('offline', 'Sin conexión - guardando localmente');
+        localStorage.setItem('blackcasinoUsuarios', JSON.stringify(usuarios));
+        return;
+      }
+
+      updateStatusIndicator('syncing', 'Guardando...');
+      const usuariosRef = database.ref('usuarios');
+      const usuariosObj = {};
+      usuarios.forEach((user, index) => {
+        usuariosObj[index] = user;
+      });
+      usuariosRef.set(usuariosObj)
+        .then(() => {
+          updateStatusIndicator('online', 'Guardado');
+          setTimeout(() => updateStatusIndicator('online', 'Conectado'), 2000);
+        })
+        .catch((error) => {
+          console.error('Error guardando usuarios:', error);
+          updateStatusIndicator('offline', 'Error al guardar');
+          // Fallback a localStorage
+          localStorage.setItem('blackcasinoUsuarios', JSON.stringify(usuarios));
+        });
+    }
+
+    cargarUsuarios();
+
+    // Verificar conexión periódicamente
+    setInterval(() => {
+      if (!firebaseConnected) {
+        updateStatusIndicator('offline', 'Sin conexión');
+      }
+    }, 30000); // Cada 30 segundos
+
+    // ── ESTADO ───────────────────────────────────────────────
+    let currentUser = null;
+    let premio      = 0;
+    let jugando     = false;
+    let apuestaBase = 20000;
+    const MIN_APUESTA = 5000;
+    let historial   = [];   // 'gol' | 'ataj'
+    let animando    = false;
+
+    // Posiciones del arquero según dirección (% desde izquierda del arco)
+    const POS_ARQUERO = { izq: '10%', centro: 'calc(50% - 20px)', der: 'calc(90% - 40px)' };
+    const POS_BALON   = { izq: '15%', centro: 'calc(50% - 26px)', der: 'calc(75% - 26px)' };
+
+    // ── LOGIN ─────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && document.getElementById('login').style.display !== 'none') {
+        const activeForm = document.querySelector('.login-form.active');
+        if (activeForm.id === 'loginForm') login();
+        else registrarse();
+      }
+    });
+
+    function switchTab(tab) {
+      document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.login-form').forEach(f => f.classList.remove('active'));
+
+      if (tab === 'login') {
+        document.querySelector('.login-tab:nth-child(1)').classList.add('active');
+        document.getElementById('loginForm').classList.add('active');
+        document.getElementById('loginErr').textContent = '';
+        document.getElementById('signupErr').textContent = '';
+      } else {
+        document.querySelector('.login-tab:nth-child(2)').classList.add('active');
+        document.getElementById('signupForm').classList.add('active');
+        document.getElementById('signupErr').textContent = '';
+        document.getElementById('loginErr').textContent = '';
+      }
+    }
+
+    function registrarse() {
+      const u = document.getElementById('newUser').value.trim();
+      const p = document.getElementById('newPass').value;
+      const p2 = document.getElementById('newPass2').value;
+      const err = document.getElementById('signupErr');
+
+      if (!u || !p || !p2) {
+        err.textContent = 'Por favor completa todos los campos.';
+        return;
+      }
+      if (p.length < 3) {
+        err.textContent = 'La contraseña debe tener al menos 3 caracteres.';
+        return;
+      }
+      if (p !== p2) {
+        err.textContent = 'Las contraseñas no coinciden.';
+        return;
+      }
+      if (usuarios.find(x => x.usuario === u)) {
+        err.textContent = 'Este usuario ya existe.';
+        return;
+      }
+
+      usuarios.push({ usuario: u, pass: p, saldo: 0, rol: 'usuario' });
+      guardarUsuarios();
+      err.textContent = '';
+      document.getElementById('signupErr').textContent = '✓ Cuenta creada. Ya puedes iniciar sesión.';
+      setTimeout(() => switchTab('login'), 1500);
+      document.getElementById('newUser').value = '';
+      document.getElementById('newPass').value = '';
+      document.getElementById('newPass2').value = '';
+    }
+
+    function abrirCreditos() {
+      document.getElementById('creditosModal').classList.add('show');
+    }
+
+    function cerrarCreditos() {
+      document.getElementById('creditosModal').classList.remove('show');
+    }
+
+    function login() {
+      const u = document.getElementById('user').value.trim();
+      const p = document.getElementById('pass').value;
+      const user = usuarios.find(x => x.usuario === u && x.pass === p);
+      if (user) {
+        currentUser = user;
+        document.getElementById('loginErr').textContent = '';
+        document.getElementById('login').style.display = 'none';
+        if (user.rol === 'admin') {
+          document.getElementById('adminPanel').style.display = 'block';
           renderAdmin();
+        } else {
+          document.getElementById('casino').style.display = 'block';
+          document.getElementById('userLabel').textContent = '👤 ' + user.usuario;
+          resetJuego();
+          actualizar();
         }
       } else {
-        // Si no hay datos, subir los usuarios iniciales
-        guardarUsuarios();
+        document.getElementById('loginErr').textContent = 'Usuario o contraseña incorrecta.';
       }
-    }, (error) => {
-      console.error('Error cargando usuarios:', error);
-      firebaseConnected = false;
-      updateStatusIndicator('offline', 'Sin conexión');
-      // Fallback a localStorage si Firebase falla
-      try {
-        const data = localStorage.getItem('blackcasinoUsuarios');
-        if (data) usuarios = JSON.parse(data);
-      } catch (e) {
-        console.warn('No se pudo cargar usuarios de localStorage', e);
-      }
-    });
-  }
-
-  function guardarUsuarios() {
-    if (!firebaseConnected) {
-      updateStatusIndicator('offline', 'Sin conexión - guardando localmente');
-      localStorage.setItem('blackcasinoUsuarios', JSON.stringify(usuarios));
-      return;
     }
 
-    updateStatusIndicator('syncing', 'Guardando...');
-    const usuariosRef = ref(database, 'usuarios');
-    const usuariosObj = {};
-    usuarios.forEach((user, index) => {
-      usuariosObj[index] = user;
-    });
-    set(usuariosRef, usuariosObj)
-      .then(() => {
-        updateStatusIndicator('online', 'Guardado');
-        setTimeout(() => updateStatusIndicator('online', 'Conectado'), 2000);
-      })
-      .catch((error) => {
-        console.error('Error guardando usuarios:', error);
-        updateStatusIndicator('offline', 'Error al guardar');
-        // Fallback a localStorage
-        localStorage.setItem('blackcasinoUsuarios', JSON.stringify(usuarios));
+    function logout() {
+      currentUser = null;
+      premio = 0; jugando = false; historial = [];
+      document.getElementById('login').style.display = 'flex';
+      document.getElementById('casino').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'none';
+      document.getElementById('user').value = '';
+      document.getElementById('pass').value = '';
+    }
+
+    // ── ADMIN ─────────────────────────────────────────────────
+    function renderAdmin() {
+      const list = document.getElementById('userList');
+      list.innerHTML = '';
+      usuarios.filter(u => u.rol === 'usuario').forEach(u => {
+        const row = document.createElement('div');
+        row.className = 'user-row';
+        row.innerHTML = `
+          <span class="name">👤 ${u.usuario}</span>
+          <span class="sal">${u.saldo.toLocaleString()} Gs</span>
+          <div>
+            <input class="admin-input" type="number" id="add_${u.usuario}" placeholder="Gs" min="0" step="1000">
+            <button class="btn-add-saldo" onclick="agregarSaldo('${u.usuario}')">+ Saldo</button>
+            <button class="btn-remove-saldo" onclick="quitarSaldo('${u.usuario}')">- Saldo</button>
+          </div>
+        `;
+        list.appendChild(row);
       });
-  }
-
-  cargarUsuarios();
-
-  // Verificar conexión periódicamente
-  setInterval(() => {
-    if (!firebaseConnected) {
-      updateStatusIndicator('offline', 'Sin conexión');
     }
-  }, 30000); // Cada 30 segundos
 
-// ── ESTADO ───────────────────────────────────────────────
-let currentUser = null;
-let premio      = 0;
-let jugando     = false;
-let apuestaBase = 20000;
-const MIN_APUESTA = 5000;
-let historial   = [];   // 'gol' | 'ataj'
-let animando    = false;
+    function agregarSaldo(nombre) {
+      const input = document.getElementById('add_' + nombre);
+      const monto = parseInt(input.value, 10);
+      if (!monto || monto <= 0) return;
+      const u = usuarios.find(x => x.usuario === nombre);
+      if (u) {
+        u.saldo += monto;
+        input.value = '';
+        guardarUsuarios();
+        renderAdmin();
+      }
+    }
 
-// Posiciones del arquero según dirección (% desde izquierda del arco)
-const POS_ARQUERO = { izq: '10%', centro: 'calc(50% - 20px)', der: 'calc(90% - 40px)' };
-const POS_BALON   = { izq: '15%', centro: 'calc(50% - 26px)', der: 'calc(75% - 26px)' };
+    function quitarSaldo(nombre) {
+      const input = document.getElementById('add_' + nombre);
+      const monto = parseInt(input.value, 10);
+      if (!monto || monto <= 0) return;
+      const u = usuarios.find(x => x.usuario === nombre);
+      if (u) {
+        u.saldo = Math.max(0, u.saldo - monto);
+        input.value = '';
+        guardarUsuarios();
+        renderAdmin();
+      }
+    }
 
-// ── LOGIN ─────────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('login').style.display !== 'none') {
-    const activeForm = document.querySelector('.login-form.active');
-    if (activeForm.id === 'loginForm') login();
-    else registrarse();
-  }
-});
-
-function switchTab(tab) {
-  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.login-form').forEach(f => f.classList.remove('active'));
-  
-  if (tab === 'login') {
-    document.querySelector('.login-tab:nth-child(1)').classList.add('active');
-    document.getElementById('loginForm').classList.add('active');
-    document.getElementById('loginErr').textContent = '';
-    document.getElementById('signupErr').textContent = '';
-  } else {
-    document.querySelector('.login-tab:nth-child(2)').classList.add('active');
-    document.getElementById('signupForm').classList.add('active');
-    document.getElementById('signupErr').textContent = '';
-    document.getElementById('loginErr').textContent = '';
-  }
-}
-
-function registrarse() {
-  const u = document.getElementById('newUser').value.trim();
-  const p = document.getElementById('newPass').value;
-  const p2 = document.getElementById('newPass2').value;
-  const err = document.getElementById('signupErr');
-  
-  if (!u || !p || !p2) {
-    err.textContent = 'Por favor completa todos los campos.';
-    return;
-  }
-  if (p.length < 3) {
-    err.textContent = 'La contraseña debe tener al menos 3 caracteres.';
-    return;
-  }
-  if (p !== p2) {
-    err.textContent = 'Las contraseñas no coinciden.';
-    return;
-  }
-  if (usuarios.find(x => x.usuario === u)) {
-    err.textContent = 'Este usuario ya existe.';
-    return;
-  }
-  
-  usuarios.push({ usuario: u, pass: p, saldo: 0, rol: 'usuario' });
-  guardarUsuarios();
-  err.textContent = '';
-  document.getElementById('signupErr').textContent = '✓ Cuenta creada. Ya puedes iniciar sesión.';
-  setTimeout(() => switchTab('login'), 1500);
-  document.getElementById('newUser').value = '';
-  document.getElementById('newPass').value = '';
-  document.getElementById('newPass2').value = '';
-}
-
-function abrirCreditos() {
-  document.getElementById('creditosModal').classList.add('show');
-}
-
-function cerrarCreditos() {
-  document.getElementById('creditosModal').classList.remove('show');
-}
-
-function login() {
-  const u = document.getElementById('user').value.trim();
-  const p = document.getElementById('pass').value;
-  const user = usuarios.find(x => x.usuario === u && x.pass === p);
-  if (user) {
-    currentUser = user;
-    document.getElementById('loginErr').textContent = '';
-    document.getElementById('login').style.display = 'none';
-    if (user.rol === 'admin') {
-      document.getElementById('adminPanel').style.display = 'block';
-      renderAdmin();
-    } else {
-      document.getElementById('casino').style.display = 'block';
-      document.getElementById('userLabel').textContent = '👤 ' + user.usuario;
-      resetJuego();
+    // ── JUEGO ─────────────────────────────────────────────────
+    function resetJuego() {
+      premio = 0; jugando = false; historial = [];
+      apuestaBase = leerApuesta();
+      setDirBtns(false);
+      document.getElementById('btnApostar').disabled = false;
+      document.getElementById('btnRetirar').disabled = true;
+      document.getElementById('historial').innerHTML = '';
+      document.getElementById('resultado').textContent = '';
+      moverArquero('centro', false);
+      moverBalon('centro', false);
+      document.getElementById('fieldMsg').className = 'field-msg';
+      document.getElementById('multiDisplay').textContent = 'x1';
       actualizar();
     }
-  } else {
-    document.getElementById('loginErr').textContent = 'Usuario o contraseña incorrecta.';
-  }
-}
 
-function logout() {
-  currentUser = null;
-  premio = 0; jugando = false; historial = [];
-  document.getElementById('login').style.display = 'flex';
-  document.getElementById('casino').style.display = 'none';
-  document.getElementById('adminPanel').style.display = 'none';
-  document.getElementById('user').value = '';
-  document.getElementById('pass').value = '';
-}
-
-// ── ADMIN ─────────────────────────────────────────────────
-function renderAdmin() {
-  const list = document.getElementById('userList');
-  list.innerHTML = '';
-  usuarios.filter(u => u.rol === 'usuario').forEach(u => {
-    const row = document.createElement('div');
-    row.className = 'user-row';
-    row.innerHTML = `
-      <span class="name">👤 ${u.usuario}</span>
-      <span class="sal">${u.saldo.toLocaleString()} Gs</span>
-      <div>
-        <input class="admin-input" type="number" id="add_${u.usuario}" placeholder="Gs" min="0" step="1000">
-        <button class="btn-add-saldo" onclick="agregarSaldo('${u.usuario}')">+ Saldo</button>
-        <button class="btn-remove-saldo" onclick="quitarSaldo('${u.usuario}')">- Saldo</button>
-      </div>
-    `;
-    list.appendChild(row);
-  });
-}
-
-function agregarSaldo(nombre) {
-  const input = document.getElementById('add_' + nombre);
-  const monto = parseInt(input.value, 10);
-  if (!monto || monto <= 0) return;
-  const u = usuarios.find(x => x.usuario === nombre);
-  if (u) {
-    u.saldo += monto;
-    input.value = '';
-    guardarUsuarios();
-    renderAdmin();
-  }
-}
-
-function quitarSaldo(nombre) {
-  const input = document.getElementById('add_' + nombre);
-  const monto = parseInt(input.value, 10);
-  if (!monto || monto <= 0) return;
-  const u = usuarios.find(x => x.usuario === nombre);
-  if (u) {
-    u.saldo = Math.max(0, u.saldo - monto);
-    input.value = '';
-    guardarUsuarios();
-    renderAdmin();
-  }
-}
-
-// ── JUEGO ─────────────────────────────────────────────────
-function resetJuego() {
-  premio = 0; jugando = false; historial = [];
-  apuestaBase = leerApuesta();
-  setDirBtns(false);
-  document.getElementById('btnApostar').disabled = false;
-  document.getElementById('btnRetirar').disabled = true;
-  document.getElementById('historial').innerHTML = '';
-  document.getElementById('resultado').textContent = '';
-  moverArquero('centro', false);
-  moverBalon('centro', false);
-  document.getElementById('fieldMsg').className = 'field-msg';
-  document.getElementById('multiDisplay').textContent = 'x1';
-  actualizar();
-}
-
-function actualizar() {
-  if (!currentUser || currentUser.rol !== 'usuario') return;
-  document.getElementById('saldoDisplay').textContent  = currentUser.saldo.toLocaleString() + ' Gs';
-  document.getElementById('premioDisplay').textContent = premio.toLocaleString() + ' Gs';
-  const multi = apuestaBase > 0 ? Math.round(premio / apuestaBase) : 1;
-  document.getElementById('multiDisplay').textContent  = 'x' + (multi || 1);
-  document.getElementById('btnApostar').textContent = `Apostar ${apuestaBase.toLocaleString()} Gs`;
-}
-
-function leerApuesta() {
-  const i = document.getElementById('inputApuesta');
-  let valor = parseInt(i.value, 10);
-  if (Number.isNaN(valor) || valor < MIN_APUESTA) valor = MIN_APUESTA;
-  valor = Math.max(MIN_APUESTA, Math.floor(valor / 5000) * 5000);
-  i.value = valor;
-  return valor;
-}
-
-function setDirBtns(enabled) {
-  ['btnIzq','btnCen','btnDer'].forEach(id => {
-    document.getElementById(id).disabled = !enabled;
-  });
-}
-
-function moverArquero(dir, anim = true) {
-  const el = document.getElementById('arquero');
-  if (!anim) el.style.transition = 'none';
-  el.style.left = POS_ARQUERO[dir] || POS_ARQUERO.centro;
-  if (!anim) setTimeout(() => { el.style.transition = 'left .35s cubic-bezier(.4,0,.2,1)'; }, 50);
-}
-
-function moverBalon(dir, anim = true) {
-  const el = document.getElementById('balon');
-  if (!anim) el.style.transition = 'none';
-  el.style.left = POS_BALON[dir] || POS_BALON.centro;
-  el.style.top  = anim ? '-60px' : '0px';
-  if (!anim) {
-    setTimeout(() => {
-      el.style.transition = 'all .4s cubic-bezier(.4,0,.2,1)';
-    }, 50);
-  }
-}
-
-function mostrarMensajeCampo(tipo) {
-  const el = document.getElementById('fieldMsg');
-  el.textContent = tipo === 'gol' ? '⚽ GOOOL!' : '🧤 ¡Atajado!';
-  el.className = 'field-msg show ' + (tipo === 'gol' ? 'gol' : 'ataj');
-  setTimeout(() => { el.className = 'field-msg'; }, 1400);
-}
-
-function agregarHistorial(tipo) {
-  historial.push(tipo);
-  const cont = document.getElementById('historial');
-  const tick = document.createElement('div');
-  tick.className = 'tick';
-  tick.textContent = tipo === 'gol' ? '⚽' : '🧤';
-  cont.appendChild(tick);
-}
-
-// ── APOSTAR ───────────────────────────────────────────────
-function apostar() {
-  if (animando) return;
-  if (!currentUser || currentUser.rol !== 'usuario') return;
-  apuestaBase = leerApuesta();
-  if (currentUser.saldo < apuestaBase) {
-    document.getElementById('resultado').textContent = '❌ Saldo insuficiente.';
-    return;
-  }
-  if (jugando) {
-    document.getElementById('resultado').textContent = 'Ya hay una apuesta activa. Tirá el balón.';
-    return;
-  }
-  currentUser.saldo -= apuestaBase;
-  guardarUsuarios();
-  premio  = apuestaBase;
-  jugando = true;
-  document.getElementById('btnApostar').disabled = true;
-  document.getElementById('btnRetirar').disabled = false;
-  setDirBtns(true);
-  resetCampo();
-  actualizar();
-  document.getElementById('resultado').textContent = '⚽ Apuesta activa — elegí la dirección';
-}
-
-function resetCampo() {
-  moverArquero('centro', false);
-  moverBalon('centro', false);
-}
-
-// ── TIRAR ────────────────────────────────────────────────
-function tirar(dir) {
-  if (!jugando || animando) return;
-  animando = true;
-  setDirBtns(false);
-
-  const opciones  = ['izq', 'centro', 'der'];
-  // El arquero tiene un 40% de chance de adivinar la dirección correcta
-  const adivina   = Math.random() < 0.40;
-  const arqueroDir = adivina ? dir : opciones[Math.floor(Math.random() * 3)];
-
-  // Animar balón hacia la dirección elegida
-  moverBalon(dir, true);
-  // Animar arquero hacia su dirección
-  setTimeout(() => moverArquero(arqueroDir, true), 100);
-
-  setTimeout(() => {
-    const atajado = (dir === arqueroDir);
-
-    if (atajado) {
-      // Perdió
-      mostrarMensajeCampo('ataj');
-      agregarHistorial('ataj');
-      document.getElementById('resultado').textContent = '🧤 ¡El arquero atajó! Perdiste todo.';
-      premio  = 0;
-      jugando = false;
-      document.getElementById('btnRetirar').disabled = true;
-      document.getElementById('btnApostar').disabled = false;
-    } else {
-      // Gol → duplicar premio
-      premio *= 2;
-      mostrarMensajeCampo('gol');
-      agregarHistorial('gol');
-      document.getElementById('resultado').textContent = `⚽ ¡GOOOL! Premio acumulado: ${premio.toLocaleString()} Gs`;
-      // Permitir seguir tirando o retirar
-      setDirBtns(true);
+    function actualizar() {
+      if (!currentUser || currentUser.rol !== 'usuario') return;
+      document.getElementById('saldoDisplay').textContent  = currentUser.saldo.toLocaleString() + ' Gs';
+      document.getElementById('premioDisplay').textContent = premio.toLocaleString() + ' Gs';
+      const multi = apuestaBase > 0 ? Math.round(premio / apuestaBase) : 1;
+      document.getElementById('multiDisplay').textContent  = 'x' + (multi || 1);
+      document.getElementById('btnApostar').textContent = `Apostar ${apuestaBase.toLocaleString()} Gs`;
     }
 
-    actualizar();
-    animando = false;
+    function leerApuesta() {
+      const i = document.getElementById('inputApuesta');
+      let valor = parseInt(i.value, 10);
+      if (Number.isNaN(valor) || valor < MIN_APUESTA) valor = MIN_APUESTA;
+      valor = Math.max(MIN_APUESTA, Math.floor(valor / 5000) * 5000);
+      i.value = valor;
+      return valor;
+    }
 
-    // Volver balón al centro después de la animación
-    setTimeout(() => moverBalon('centro', false), 600);
-  }, 500);
-}
+    function setDirBtns(enabled) {
+      ['btnIzq','btnCen','btnDer'].forEach(id => {
+        document.getElementById(id).disabled = !enabled;
+      });
+    }
 
-// ── RETIRAR ───────────────────────────────────────────────
-function retirar() {
-  if (!jugando || premio <= 0 || animando) return;
-  currentUser.saldo += premio;
-  guardarUsuarios();
-  const ganado = premio;
-  premio  = 0;
-  jugando = false;
-  setDirBtns(false);
-  document.getElementById('btnRetirar').disabled = true;
-  document.getElementById('btnApostar').disabled = false;
-  document.getElementById('resultado').textContent = `💰 ¡Retiraste ${ganado.toLocaleString()} Gs!`;
-  actualizar();
-  setTimeout(() => resetCampo(), 300);
-}
+    function moverArquero(dir, anim = true) {
+      const el = document.getElementById('arquero');
+      if (!anim) el.style.transition = 'none';
+      el.style.left = POS_ARQUERO[dir] || POS_ARQUERO.centro;
+      if (!anim) setTimeout(() => { el.style.transition = 'left .35s cubic-bezier(.4,0,.2,1)'; }, 50);
+    }
 
-const inputApuesta = document.getElementById('inputApuesta');
-if (inputApuesta) {
-  inputApuesta.addEventListener('change', () => {
-    apuestaBase = leerApuesta();
-    if (!jugando) actualizar();
+    function moverBalon(dir, anim = true) {
+      const el = document.getElementById('balon');
+      if (!anim) el.style.transition = 'none';
+      el.style.left = POS_BALON[dir] || POS_BALON.centro;
+      el.style.top  = anim ? '-60px' : '0px';
+      if (!anim) {
+        setTimeout(() => {
+          el.style.transition = 'all .4s cubic-bezier(.4,0,.2,1)';
+        }, 50);
+      }
+    }
+
+    function mostrarMensajeCampo(tipo) {
+      const el = document.getElementById('fieldMsg');
+      el.textContent = tipo === 'gol' ? '⚽ GOOOL!' : '🧤 ¡Atajado!';
+      el.className = 'field-msg show ' + (tipo === 'gol' ? 'gol' : 'ataj');
+      setTimeout(() => { el.className = 'field-msg'; }, 1400);
+    }
+
+    function agregarHistorial(tipo) {
+      historial.push(tipo);
+      const cont = document.getElementById('historial');
+      const tick = document.createElement('div');
+      tick.className = 'tick';
+      tick.textContent = tipo === 'gol' ? '⚽' : '🧤';
+      cont.appendChild(tick);
+    }
+
+    // ── APOSTAR ───────────────────────────────────────────────
+    function apostar() {
+      if (animando) return;
+      if (!currentUser || currentUser.rol !== 'usuario') return;
+      apuestaBase = leerApuesta();
+      if (currentUser.saldo < apuestaBase) {
+        document.getElementById('resultado').textContent = '❌ Saldo insuficiente.';
+        return;
+      }
+      if (jugando) {
+        document.getElementById('resultado').textContent = 'Ya hay una apuesta activa. Tirá el balón.';
+        return;
+      }
+      currentUser.saldo -= apuestaBase;
+      guardarUsuarios();
+      premio  = apuestaBase;
+      jugando = true;
+      document.getElementById('btnApostar').disabled = true;
+      document.getElementById('btnRetirar').disabled = false;
+      setDirBtns(true);
+      resetCampo();
+      actualizar();
+      document.getElementById('resultado').textContent = '⚽ Apuesta activa — elegí la dirección';
+    }
+
+    function resetCampo() {
+      moverArquero('centro', false);
+      moverBalon('centro', false);
+    }
+
+    // ── TIRAR ────────────────────────────────────────────────
+    function tirar(dir) {
+      if (!jugando || animando) return;
+      animando = true;
+      setDirBtns(false);
+
+      const opciones  = ['izq', 'centro', 'der'];
+      // El arquero tiene un 40% de chance de adivinar la dirección correcta
+      const adivina   = Math.random() < 0.40;
+      const arqueroDir = adivina ? dir : opciones[Math.floor(Math.random() * 3)];
+
+      // Animar balón hacia la dirección elegida
+      moverBalon(dir, true);
+      // Animar arquero hacia su dirección
+      setTimeout(() => moverArquero(arqueroDir, true), 100);
+
+      setTimeout(() => {
+        const atajado = (dir === arqueroDir);
+
+        if (atajado) {
+          // Perdió
+          mostrarMensajeCampo('ataj');
+          agregarHistorial('ataj');
+          document.getElementById('resultado').textContent = '🧤 ¡El arquero atajó! Perdiste todo.';
+          premio  = 0;
+          jugando = false;
+          document.getElementById('btnRetirar').disabled = true;
+          document.getElementById('btnApostar').disabled = false;
+        } else {
+          // Gol → duplicar premio
+          premio *= 2;
+          mostrarMensajeCampo('gol');
+          agregarHistorial('gol');
+          document.getElementById('resultado').textContent = `⚽ ¡GOOOL! Premio acumulado: ${premio.toLocaleString()} Gs`;
+          // Permitir seguir tirando o retirar
+          setDirBtns(true);
+        }
+
+        actualizar();
+        animando = false;
+
+        // Volver balón al centro después de la animación
+        setTimeout(() => moverBalon('centro', false), 600);
+      }, 500);
+    }
+
+    // ── RETIRAR ───────────────────────────────────────────────
+    function retirar() {
+      if (!jugando || premio <= 0 || animando) return;
+      currentUser.saldo += premio;
+      guardarUsuarios();
+      const ganado = premio;
+      premio  = 0;
+      jugando = false;
+      setDirBtns(false);
+      document.getElementById('btnRetirar').disabled = true;
+      document.getElementById('btnApostar').disabled = false;
+      document.getElementById('resultado').textContent = `💰 ¡Retiraste ${ganado.toLocaleString()} Gs!`;
+      actualizar();
+      setTimeout(() => resetCampo(), 300);
+    }
+
+    const inputApuesta = document.getElementById('inputApuesta');
+    if (inputApuesta) {
+      inputApuesta.addEventListener('change', () => {
+        apuestaBase = leerApuesta();
+        if (!jugando) actualizar();
+      });
+    }
+
+  }).catch((error) => {
+    console.error('Error cargando Firebase:', error);
+    document.getElementById('statusIndicator').textContent = '🔴 Error Firebase';
+    document.getElementById('statusIndicator').className = 'status-indicator status-offline';
   });
-}
-
 </script>
 </body>
 </html>
