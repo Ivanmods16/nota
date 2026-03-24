@@ -143,7 +143,19 @@
     cursor: pointer;
     margin-top: 16px;
   }
-  .btn-close-creditos:hover { background: #444; }
+  .status-indicator {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    z-index: 1001;
+  }
+  .status-online { background: #22c55e; color: white; }
+  .status-offline { background: #ef4444; color: white; }
+  .status-syncing { background: #fbbf24; color: black; }
 
   /* ── CASINO ─────────────────────────────── */
   #casino {
@@ -501,6 +513,9 @@
   </div>
 </div>
 
+<!-- ── INDICADOR DE ESTADO ─────────────────────────────── -->
+<div id="statusIndicator" class="status-indicator status-syncing">🔄 Sincronizando...</div>
+
 <!-- ── CASINO ─────────────────────────────── -->
 <div id="casino">
   <div class="header">
@@ -580,31 +595,123 @@
   <button class="btn-logout" style="margin-top:16px" onclick="logout()">Cerrar sesión</button>
 </div>
 
-<script>
-// ── DATOS ────────────────────────────────────────────────
-// Podés agregar más usuarios acá
-let usuarios = [
-  { usuario: 'admin', pass: '1234', saldo: 0,      rol: 'admin'   },
-  { usuario: 'ivan',  pass: '123',  saldo: 100000, rol: 'usuario' },  
-  { usuario: 'Aron',  pass: '123',  saldo: 100000, rol: 'usuario' },
-];
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-function cargarUsuarios() {
-  try {
-    const data = localStorage.getItem('blackcasinoUsuarios');
-    if (!data) return;
-    const parsed = JSON.parse(data);
-    if (Array.isArray(parsed)) usuarios = parsed;
-  } catch (e) {
-    console.warn('No se pudo cargar usuarios de localStorage', e);
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyB15Y32QkVMCx2LvR8AK6UGlcesIUHs3-Y",
+    authDomain: "blackstore-99034.firebaseapp.com",
+    projectId: "blackstore-99034",
+    storageBucket: "blackstore-99034.firebasestorage.app",
+    messagingSenderId: "930634558088",
+    appId: "1:930634558088:web:5b23568d24511797d94d3d",
+    measurementId: "G-Z9EJD0KC7M"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+
+  // Estado de conexión
+  let firebaseConnected = false;
+  let firebaseSyncing = false;
+
+  function updateStatusIndicator(status, message) {
+    const indicator = document.getElementById('statusIndicator');
+    if (!indicator) return;
+    
+    indicator.className = 'status-indicator';
+    if (status === 'online') {
+      indicator.classList.add('status-online');
+      indicator.textContent = '🟢 Online';
+    } else if (status === 'offline') {
+      indicator.classList.add('status-offline');
+      indicator.textContent = '🔴 Offline';
+    } else if (status === 'syncing') {
+      indicator.classList.add('status-syncing');
+      indicator.textContent = '🔄 Sincronizando...';
+    }
   }
-}
 
-function guardarUsuarios() {
-  localStorage.setItem('blackcasinoUsuarios', JSON.stringify(usuarios));
-}
+  // ── DATOS ────────────────────────────────────────────────
+  // Podés agregar más usuarios acá
+  let usuarios = [
+    { usuario: 'admin', pass: '1234', saldo: 0,      rol: 'admin'   },
+    { usuario: 'ivan',  pass: '123',  saldo: 100000, rol: 'usuario' },
+  ];
 
-cargarUsuarios();
+  function cargarUsuarios() {
+    updateStatusIndicator('syncing', 'Cargando datos...');
+    const usuariosRef = ref(database, 'usuarios');
+    onValue(usuariosRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        usuarios = Object.values(data);
+        console.log('Usuarios cargados desde Firebase:', usuarios);
+        firebaseConnected = true;
+        updateStatusIndicator('online', 'Conectado');
+        // Actualizar panel admin si está abierto
+        if (document.getElementById('adminPanel').style.display === 'block') {
+          renderAdmin();
+        }
+      } else {
+        // Si no hay datos, subir los usuarios iniciales
+        guardarUsuarios();
+      }
+    }, (error) => {
+      console.error('Error cargando usuarios:', error);
+      firebaseConnected = false;
+      updateStatusIndicator('offline', 'Sin conexión');
+      // Fallback a localStorage si Firebase falla
+      try {
+        const data = localStorage.getItem('blackcasinoUsuarios');
+        if (data) usuarios = JSON.parse(data);
+      } catch (e) {
+        console.warn('No se pudo cargar usuarios de localStorage', e);
+      }
+    });
+  }
+
+  function guardarUsuarios() {
+    if (!firebaseConnected) {
+      updateStatusIndicator('offline', 'Sin conexión - guardando localmente');
+      localStorage.setItem('blackcasinoUsuarios', JSON.stringify(usuarios));
+      return;
+    }
+
+    updateStatusIndicator('syncing', 'Guardando...');
+    const usuariosRef = ref(database, 'usuarios');
+    const usuariosObj = {};
+    usuarios.forEach((user, index) => {
+      usuariosObj[index] = user;
+    });
+    set(usuariosRef, usuariosObj)
+      .then(() => {
+        updateStatusIndicator('online', 'Guardado');
+        setTimeout(() => updateStatusIndicator('online', 'Conectado'), 2000);
+      })
+      .catch((error) => {
+        console.error('Error guardando usuarios:', error);
+        updateStatusIndicator('offline', 'Error al guardar');
+        // Fallback a localStorage
+        localStorage.setItem('blackcasinoUsuarios', JSON.stringify(usuarios));
+      });
+  }
+
+  cargarUsuarios();
+
+  // Verificar conexión periódicamente
+  setInterval(() => {
+    if (!firebaseConnected) {
+      updateStatusIndicator('offline', 'Sin conexión');
+    }
+  }, 30000); // Cada 30 segundos
 
 // ── ESTADO ───────────────────────────────────────────────
 let currentUser = null;
