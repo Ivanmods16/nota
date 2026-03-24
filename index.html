@@ -600,6 +600,7 @@
   const firebaseConfig = {
     apiKey: "AIzaSyB15Y32QkVMCx2LvR8AK6UGlcesIUHs3-Y",
     authDomain: "blackstore-99034.firebaseapp.com",
+    databaseURL: "https://blackstore-99034-default-rtdb.firebaseio.com",
     projectId: "blackstore-99034",
     storageBucket: "blackstore-99034.firebasestorage.app",
     messagingSenderId: "930634558088",
@@ -1086,6 +1087,17 @@
         if (!jugando) actualizar();
       });
     }
+
+    // Exponer funciones al scope global para que onclick de HTML funcione
+    window.switchTab = switchTab;
+    window.registrarse = registrarse;
+    window.login = login;
+    window.logout = logout;
+    window.agregarSaldo = agregarSaldo;
+    window.quitarSaldo = quitarSaldo;
+    window.tirar = tirar;
+    window.apostar = apostar;
+    window.retirar = retirar;
 
     // Iniciar carga de datos DESPUÉS de definir todas las funciones
     cargarUsuarios();
