@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firebase Test</title>
+</head>
+<body>
+    <h1>Firebase Connection Test</h1>
+    <div id="status">Testing...</div>
+    <div id="result"></div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB15Y32QkVMCx2LvR8AK6UGlcesIUHs3-Y",
+            authDomain: "blackstore-99034.firebaseapp.com",
+            projectId: "blackstore-99034",
+            storageBucket: "blackstore-99034.firebasestorage.app",
+            messagingSenderId: "930634558088",
+            appId: "1:930634558088:web:5b23568d24511797d94d3d",
+            measurementId: "G-Z9EJD0KC7M"
+        };
+
+        function loadFirebase() {
+            return new Promise((resolve, reject) => {
+                const appScript = document.createElement('script');
+                appScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
+                appScript.onload = () => {
+                    const dbScript = document.createElement('script');
+                    dbScript.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js';
+                    dbScript.onload = resolve;
+                    dbScript.onerror = reject;
+                    document.head.appendChild(dbScript);
+                };
+                appScript.onerror = reject;
+                document.head.appendChild(appScript);
+            });
+        }
+
+        loadFirebase().then(() => {
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+
+            document.getElementById('status').textContent = 'Firebase loaded, testing connection...';
+
+            const testRef = database.ref('test');
+            testRef.set({ timestamp: Date.now(), message: 'Connection test' })
+                .then(() => {
+                    document.getElementById('status').textContent = '✅ SUCCESS: Firebase is working!';
+                    document.getElementById('result').textContent = 'Data written successfully. Check Firebase Console.';
+                })
+                .catch((error) => {
+                    document.getElementById('status').textContent = '❌ FAILED: Cannot connect to Firebase';
+                    document.getElementById('result').textContent = `Error: ${error.message} (Code: ${error.code})`;
+                    console.error('Firebase error:', error);
+                });
+        }).catch((error) => {
+            document.getElementById('status').textContent = '❌ FAILED: Cannot load Firebase';
+            document.getElementById('result').textContent = `Error: ${error.message}`;
+        });
+    </script>
+</body>
+</html>
