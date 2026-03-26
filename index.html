@@ -63,11 +63,6 @@
   .creditos-metodo .detalle { color: #888; }
   .btn-close-creditos { width: 100%; padding: 12px; background: #333; color: #fff; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; margin-top: 16px; }
 
-  .status-indicator { position: fixed; top: 10px; right: 10px; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; z-index: 1001; }
-  .status-online  { background: #22c55e; color: white; }
-  .status-offline { background: #ef4444; color: white; }
-  .status-syncing { background: #fbbf24; color: black; }
-
   #casino { display: none; width: 100%; max-width: 560px; padding: 20px; text-align: center; }
 
   .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -187,9 +182,6 @@
   </div>
 </div>
 
-<!-- INDICADOR DE ESTADO -->
-<div id="statusIndicator" class="status-indicator status-syncing">🔄 Conectando...</div>
-
 <!-- CASINO -->
 <div id="casino">
   <div class="header">
@@ -284,61 +276,66 @@ const MIN_APUESTA = 5000;
 const POS_ARQUERO = { izq: '10%', centro: 'calc(50% - 20px)', der: 'calc(90% - 40px)' };
 const POS_BALON   = { izq: '15%', centro: 'calc(50% - 26px)', der: 'calc(75% - 26px)' };
 
-// ── INDICADOR ────────────────────────────────────────────
-function setStatus(estado) {
-  const el = document.getElementById('statusIndicator');
-  if (!el) return;
-  if (estado === 'online')  { el.className = 'status-indicator status-online';  el.textContent = '🟢 Online'; }
-  if (estado === 'offline') { el.className = 'status-indicator status-offline'; el.textContent = '🔴 Sin conexión'; }
-  if (estado === 'syncing') { el.className = 'status-indicator status-syncing'; el.textContent = '🔄 Guardando...'; }
-}
-
 // ── FIREBASE: CARGAR ─────────────────────────────────────
-function cargarUsuarios() {
+function cargarUsuarios(callback) {
   db.ref('usuarios').once('value')
     .then(snap => {
       const data = snap.val();
       if (data) {
-        // Firebase guarda como objeto con claves numéricas, convertir a array
         usuarios = Object.values(data);
       } else {
-        // Primera vez: subir usuarios por defecto
         guardarUsuarios();
       }
       firebaseOk = true;
-      setStatus('online');
+      if (callback) callback();
     })
     .catch(err => {
       console.warn('Firebase no disponible, usando localStorage:', err.message);
       firebaseOk = false;
-      setStatus('offline');
       const local = localStorage.getItem('blackcasino_users');
       if (local) {
         try { usuarios = JSON.parse(local); } catch(e) {}
       }
+      if (callback) callback();
     });
 }
 
 // ── FIREBASE: GUARDAR ────────────────────────────────────
 function guardarUsuarios() {
-  // Guardar siempre en localStorage como respaldo
   localStorage.setItem('blackcasino_users', JSON.stringify(usuarios));
-
-  if (!firebaseOk) {
-    setStatus('offline');
-    return;
-  }
-
-  setStatus('syncing');
+  if (!firebaseOk) return;
   const obj = {};
   usuarios.forEach((u, i) => { obj[i] = u; });
+  db.ref('usuarios').set(obj).catch(err => {
+    console.warn('Error al guardar en Firebase:', err.message);
+  });
+}
 
-  db.ref('usuarios').set(obj)
-    .then(() => setStatus('online'))
-    .catch(err => {
-      console.warn('Error al guardar en Firebase:', err.message);
-      setStatus('offline');
-    });
+// ── SESIÓN PERSISTENTE ───────────────────────────────────
+function guardarSesion(usuario) {
+  localStorage.setItem('blackcasino_session', usuario);
+}
+
+function borrarSesion() {
+  localStorage.removeItem('blackcasino_session');
+}
+
+function restaurarSesion() {
+  const sesionGuardada = localStorage.getItem('blackcasino_session');
+  if (!sesionGuardada) return false;
+  const user = usuarios.find(x => x.usuario === sesionGuardada);
+  if (!user) return false;
+  currentUser = user;
+  document.getElementById('login').style.display = 'none';
+  if (user.rol === 'admin') {
+    document.getElementById('adminPanel').style.display = 'block';
+    renderAdmin();
+  } else {
+    document.getElementById('casino').style.display = 'block';
+    document.getElementById('userLabel').textContent = '👤 ' + user.usuario;
+    resetJuego();
+  }
+  return true;
 }
 
 // ── LOGIN ─────────────────────────────────────────────────
@@ -381,6 +378,7 @@ function login() {
   const user = usuarios.find(x => x.usuario === u && x.pass === p);
   if (!user) { document.getElementById('loginErr').textContent = 'Usuario o contraseña incorrecta.'; return; }
   currentUser = user;
+  guardarSesion(user.usuario); // ← guardar sesión al entrar
   document.getElementById('loginErr').textContent = '';
   document.getElementById('login').style.display = 'none';
   if (user.rol === 'admin') {
@@ -394,6 +392,7 @@ function login() {
 }
 
 function logout() {
+  borrarSesion(); // ← borrar sesión al salir
   currentUser = null;
   premio = 0; jugando = false; historial = [];
   document.getElementById('login').style.display = 'flex';
@@ -586,22 +585,35 @@ document.addEventListener('keydown', e => {
   else registrarse();
 });
 
-// ── INICIO ────────────────────────────────────────────────
-// Escuchar estado de conexión de Firebase en tiempo real
+// ── CONEXIÓN FIREBASE ─────────────────────────────────────
 db.ref('.info/connected').on('value', snap => {
   if (snap.val() === true) {
     firebaseOk = true;
-    setStatus('online');
-    // Recargar datos al reconectar
-    cargarUsuarios();
+    // Si el usuario está activo, sincronizar saldo actualizado
+    if (currentUser) {
+      db.ref('usuarios').once('value').then(s => {
+        const data = s.val();
+        if (data) {
+          const actualizado = Object.values(data).find(x => x.usuario === currentUser.usuario);
+          if (actualizado) {
+            currentUser.saldo = actualizado.saldo;
+            usuarios = Object.values(data);
+            if (currentUser.rol === 'usuario') actualizar();
+            if (currentUser.rol === 'admin') renderAdmin();
+          }
+        }
+      });
+    }
   } else {
     firebaseOk = false;
-    setStatus('offline');
   }
 });
 
-// Carga inicial
-cargarUsuarios();
+// ── INICIO ────────────────────────────────────────────────
+// Carga usuarios y luego intenta restaurar la sesión automáticamente
+cargarUsuarios(() => {
+  restaurarSesion();
+});
 </script>
 </body>
 </html>
