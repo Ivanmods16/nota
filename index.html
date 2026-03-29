@@ -4,248 +4,556 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blackcasino ⚽</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #0a0a0a;
-    color: #fff;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+:root {
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --gold: #f59e0b;
+  --red: #ef4444;
+  --bg: #080808;
+  --card: #111111;
+  --card2: #161616;
+  --border: #1f1f1f;
+  --border2: #2a2a2a;
+  --text: #ffffff;
+  --muted: #555;
+  --muted2: #888;
+}
 
-  #login {
-    background: #111;
-    border: 1px solid #222;
-    border-radius: 16px;
-    padding: 40px 48px;
-    width: 340px;
-    text-align: center;
-  }
-  #login .logo { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; }
-  #login .logo span { color: #22c55e; }
-  #login .sub { color: #555; font-size: 13px; margin-bottom: 28px; }
-  #login label { display: block; text-align: left; font-size: 12px; color: #888; margin-bottom: 4px; margin-top: 16px; }
-  #login input {
-    width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a;
-    border-radius: 8px; color: #fff; padding: 10px 14px; font-size: 14px; outline: none; transition: border-color .2s;
-  }
-  #login input:focus { border-color: #22c55e; }
-  #login .btn-login {
-    width: 100%; margin-top: 24px; padding: 12px; background: #22c55e;
-    color: #000; font-weight: 700; font-size: 15px; border: none; border-radius: 8px; cursor: pointer; transition: background .2s;
-  }
-  #login .btn-login:hover { background: #16a34a; }
-  #login .err { color: #ef4444; font-size: 13px; margin-top: 12px; min-height: 18px; }
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+}
 
-  .login-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #222; }
-  .login-tab {
-    flex: 1; padding: 10px; background: none; border: none; color: #666;
-    font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s;
-  }
-  .login-tab.active { color: #22c55e; border-bottom-color: #22c55e; }
-  .login-form { display: none; }
-  .login-form.active { display: block; }
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(34,197,94,0.07) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
 
-  .creditos-link { font-size: 12px; color: #fbbf24; text-decoration: none; cursor: pointer; display: inline-block; margin-top: 12px; }
-  .creditos-link:hover { text-decoration: underline; }
+/* ── LOADING ── */
+#loadingScreen {
+  position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+  display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+}
+.loading-logo { font-size: 40px; font-weight: 800; letter-spacing: -2px; }
+.loading-logo span { color: var(--green); }
+.loading-bar { width: 200px; height: 2px; background: #222; border-radius: 2px; overflow: hidden; }
+.loading-bar-inner { height: 100%; background: var(--green); animation: loadBar 1.5s ease forwards; }
+@keyframes loadBar { from { width: 0; } to { width: 100%; } }
 
-  #creditosModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 1000; align-items: center; justify-content: center; }
-  #creditosModal.show { display: flex; }
-  .creditos-content { background: #111; border: 1px solid #222; border-radius: 16px; padding: 32px; max-width: 480px; width: 90%; max-height: 80vh; overflow-y: auto; }
-  .creditos-content h2 { font-size: 20px; margin-bottom: 16px; color: #22c55e; }
-  .creditos-content p { font-size: 13px; color: #aaa; line-height: 1.6; margin-bottom: 12px; }
-  .creditos-metodo { background: #1a1a1a; border: 1px solid #222; border-radius: 8px; padding: 12px; margin-bottom: 12px; font-size: 12px; }
-  .creditos-metodo .titulo { color: #22c55e; font-weight: 700; margin-bottom: 6px; }
-  .creditos-metodo .detalle { color: #888; }
-  .btn-close-creditos { width: 100%; padding: 12px; background: #333; color: #fff; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; margin-top: 16px; }
+/* ── LOGIN ── */
+#login {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 44px 48px;
+  width: 380px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  animation: fadeUp .4s ease;
+}
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+.logo { font-size: 32px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 4px; }
+.logo span { color: var(--green); }
+.sub { color: var(--muted); font-size: 12px; margin-bottom: 28px; letter-spacing: 1px; text-transform: uppercase; font-family: 'Space Mono', monospace; }
 
-  #casino { display: none; width: 100%; max-width: 560px; padding: 20px; text-align: center; }
+.login-tabs { display: flex; gap: 0; margin-bottom: 24px; background: #0d0d0d; border-radius: 10px; padding: 4px; border: 1px solid var(--border); }
+.login-tab { flex: 1; padding: 9px; background: none; border: none; color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; border-radius: 8px; transition: all .2s; font-family: 'Syne', sans-serif; }
+.login-tab.active { background: var(--card2); color: var(--green); }
 
-  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .header .logo { font-size: 22px; font-weight: 800; }
-  .header .logo span { color: #22c55e; }
-  .header .user-info { font-size: 13px; color: #666; }
-  .header .btn-logout { background: none; border: 1px solid #333; color: #888; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
-  .header .btn-logout:hover { border-color: #555; color: #ccc; }
+.login-form { display: none; }
+.login-form.active { display: block; }
 
-  .stats { display: flex; gap: 12px; margin-bottom: 20px; }
-  .stat-card { flex: 1; background: #111; border: 1px solid #1e1e1e; border-radius: 12px; padding: 14px; }
-  .stat-card .label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
-  .stat-card .value { font-size: 22px; font-weight: 700; color: #fff; }
-  .stat-card .value.green { color: #22c55e; }
+label { display: block; text-align: left; font-size: 11px; color: var(--muted2); margin-bottom: 5px; margin-top: 14px; text-transform: uppercase; letter-spacing: .5px; font-family: 'Space Mono', monospace; }
+input[type=text], input[type=email], input[type=password], input[type=number] {
+  width: 100%; background: #0d0d0d; border: 1px solid var(--border2);
+  border-radius: 10px; color: var(--text); padding: 11px 14px; font-size: 14px; outline: none;
+  transition: border-color .2s; font-family: 'Syne', sans-serif;
+}
+input:focus { border-color: var(--green); }
+input::placeholder { color: var(--muted); }
 
-  .field { background: #14532d; border: 3px solid #166534; border-radius: 16px; padding: 20px; margin-bottom: 16px; position: relative; min-height: 220px; overflow: hidden; }
-  .arco { width: 160px; height: 70px; border: 4px solid rgba(255,255,255,0.7); border-bottom: none; border-radius: 8px 8px 0 0; margin: 0 auto 10px; position: relative; background: rgba(255,255,255,0.05); }
-  .arco::after { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.12) 0, rgba(255,255,255,.12) 1px, transparent 1px, transparent 14px), repeating-linear-gradient(90deg, rgba(255,255,255,.12) 0, rgba(255,255,255,.12) 1px, transparent 1px, transparent 14px); }
-  .arquero-wrap { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; height: 70px; }
-  #arquero { width: 40px; height: 60px; background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #1e40af 100%); border: 2px solid #ffffff; border-radius: 6px; position: absolute; bottom: 0; transition: left .35s cubic-bezier(.4,0,.2,1); left: calc(50% - 20px); display: flex; align-items: center; justify-content: center; font-size: 32px; }
-  #arquero::after { content: '🧤'; }
-  .balon-wrap { display: flex; justify-content: center; margin: 10px 0 6px; height: 56px; position: relative; }
-  #balon { width: 52px; height: 52px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #f8fafc 0%, #e2e8f0 80%); box-shadow: inset -2px -2px 0 #9ca3af, inset 3px 3px 6px rgba(0,0,0,.25); position: absolute; transition: all .4s cubic-bezier(.4,0,.2,1); left: calc(50% - 26px); top: 0; }
-  .penalty-line { width: 60px; height: 3px; background: rgba(255,255,255,.5); margin: 0 auto; border-radius: 2px; }
-  .field-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 28px; font-weight: 900; text-shadow: 0 2px 12px rgba(0,0,0,.8); pointer-events: none; opacity: 0; transition: opacity .3s; white-space: nowrap; }
-  .field-msg.show { opacity: 1; }
-  .field-msg.gol  { color: #22c55e; }
-  .field-msg.ataj { color: #ef4444; }
+.pass-wrap { position: relative; }
+.pass-wrap input { padding-right: 42px; }
+.toggle-pass { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 4px; }
 
-  .dir-btns { display: flex; gap: 10px; margin-bottom: 12px; }
-  .btn-dir { flex: 1; padding: 14px 0; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; color: #fff; font-size: 22px; cursor: pointer; transition: background .15s, border-color .15s, transform .1s; }
-  .btn-dir:hover:not(:disabled) { background: #222; border-color: #3a3a3a; }
-  .btn-dir:active:not(:disabled) { transform: scale(.96); }
-  .btn-dir:disabled { opacity: .3; cursor: not-allowed; }
-  .btn-dir .dir-label { display: block; font-size: 11px; color: #555; margin-top: 2px; }
+.pass-strength { margin-top: 6px; height: 4px; border-radius: 2px; background: var(--border); overflow: hidden; }
+.pass-strength-bar { height: 100%; border-radius: 2px; transition: all .3s; width: 0%; }
 
-  .bet-control { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
-  .bet-control input { width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid #2a2a2a; border-radius: 8px; background: #1a1a1a; color: white; font-size: 14px; }
-  .bet-control label { font-size: 13px; color: #888; white-space: nowrap; }
+.strength-hint { font-size: 11px; margin-top: 4px; text-align: left; font-family: 'Space Mono', monospace; }
 
-  .btn-apostar { width: 100%; padding: 14px; background: #22c55e; color: #000; font-weight: 700; font-size: 15px; border: none; border-radius: 10px; cursor: pointer; margin-bottom: 10px; transition: background .2s; }
-  .btn-apostar:hover:not(:disabled) { background: #16a34a; }
-  .btn-apostar:disabled { background: #1a1a1a; color: #444; cursor: not-allowed; }
+.btn-login {
+  width: 100%; margin-top: 22px; padding: 13px; background: var(--green);
+  color: #000; font-weight: 800; font-size: 15px; border: none; border-radius: 10px; cursor: pointer;
+  transition: background .2s, transform .1s; font-family: 'Syne', sans-serif; letter-spacing: .5px;
+}
+.btn-login:hover { background: var(--green-dark); }
+.btn-login:active { transform: scale(.98); }
 
-  .btn-retirar { width: 100%; padding: 14px; background: #1a1a1a; border: 1px solid #ca8a04; color: #fbbf24; font-weight: 700; font-size: 15px; border-radius: 10px; cursor: pointer; transition: background .2s; margin-bottom: 12px; }
-  .btn-retirar:hover:not(:disabled) { background: #2a2000; }
-  .btn-retirar:disabled { opacity: .3; cursor: not-allowed; }
+.err { color: var(--red); font-size: 12px; margin-top: 10px; min-height: 16px; font-family: 'Space Mono', monospace; }
+.ok  { color: var(--green); font-size: 12px; margin-top: 10px; font-family: 'Space Mono', monospace; }
 
-  .historial-title { font-size: 12px; color: #444; text-align: left; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
-  .historial { display: flex; gap: 6px; flex-wrap: wrap; }
-  .tick { font-size: 18px; background: #111; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #1e1e1e; }
+.creditos-link { font-size: 12px; color: var(--gold); text-decoration: none; cursor: pointer; display: inline-block; margin-top: 14px; font-family: 'Space Mono', monospace; }
+.creditos-link:hover { text-decoration: underline; }
 
-  #resultado { font-size: 13px; color: #666; min-height: 20px; margin-top: 8px; }
+/* ── MODAL ── */
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.modal.show { display: flex; }
+.modal-content { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 32px; max-width: 500px; width: 92%; max-height: 85vh; overflow-y: auto; animation: fadeUp .25s ease; }
+.modal-content h2 { font-size: 20px; font-weight: 800; margin-bottom: 16px; color: var(--green); }
+.modal-content p { font-size: 13px; color: #aaa; line-height: 1.7; margin-bottom: 12px; }
+.metodo { background: #0d0d0d; border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.metodo .titulo { color: var(--green); font-weight: 700; margin-bottom: 6px; font-size: 13px; }
+.metodo .detalle { color: #888; font-size: 12px; font-family: 'Space Mono', monospace; }
+.btn-close { width: 100%; padding: 12px; background: #222; color: var(--text); border: none; border-radius: 10px; font-size: 14px; cursor: pointer; margin-top: 16px; font-family: 'Syne', sans-serif; font-weight: 700; }
+.btn-close:hover { background: #2a2a2a; }
 
-  #adminPanel { display: none; background: #111; border: 1px solid #1e1e1e; border-radius: 16px; padding: 28px; width: 100%; max-width: 560px; text-align: left; }
-  #adminPanel h2 { font-size: 18px; margin-bottom: 16px; }
-  .user-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #1e1e1e; font-size: 14px; }
-  .user-row .name { font-weight: 600; }
-  .user-row .sal  { color: #22c55e; }
-  .admin-input { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 6px; color: #fff; padding: 6px 10px; font-size: 13px; width: 90px; outline: none; }
-  .btn-add-saldo    { background: #22c55e; color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; margin-left: 6px; }
-  .btn-add-saldo:hover { background: #16a34a; }
-  .btn-remove-saldo { background: #ef4444; color: #000; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; margin-left: 4px; }
-  .btn-remove-saldo:hover { background: #dc2626; }
+/* ── CASINO (WRAPPER) ── */
+#casino { display: none; width: 100%; max-width: 580px; padding: 16px; text-align: center; position: relative; z-index: 1; }
+
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.header .logo { font-size: 20px; font-weight: 800; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.user-info { font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; }
+.btn-logout { background: none; border: 1px solid var(--border2); color: var(--muted2); border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 700; transition: all .2s; }
+.btn-logout:hover { border-color: #555; color: var(--text); }
+
+.stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 10px; }
+.stat-card .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; font-family: 'Space Mono', monospace; }
+.stat-card .val { font-size: 18px; font-weight: 800; }
+.stat-card .val.green { color: var(--green); }
+.stat-card .val.gold { color: var(--gold); }
+
+/* ── GAME TABS ── */
+.game-tabs { display: flex; gap: 0; margin-bottom: 16px; background: #0d0d0d; border-radius: 12px; padding: 4px; border: 1px solid var(--border); }
+.game-tab { flex: 1; padding: 10px; background: none; border: none; color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; border-radius: 9px; transition: all .2s; font-family: 'Syne', sans-serif; }
+.game-tab.active { background: var(--card2); color: var(--text); }
+.game-panel { display: none; }
+.game-panel.active { display: block; }
+
+/* ── PENALES ── */
+.field { background: linear-gradient(180deg, #14532d 0%, #166534 100%); border: 2px solid #15803d; border-radius: 16px; padding: 20px; margin-bottom: 14px; position: relative; min-height: 220px; overflow: hidden; }
+.field::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 1px, transparent 28px), repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 1px, transparent 28px); }
+.arco { width: 160px; height: 70px; border: 4px solid rgba(255,255,255,.75); border-bottom: none; border-radius: 8px 8px 0 0; margin: 0 auto 10px; position: relative; background: rgba(255,255,255,.04); }
+.arquero-wrap { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; height: 70px; }
+#arquero { width: 40px; height: 60px; background: linear-gradient(135deg, #60a5fa, #1e40af); border: 2px solid #fff; border-radius: 6px; position: absolute; bottom: 0; transition: left .35s cubic-bezier(.4,0,.2,1); left: calc(50% - 20px); display: flex; align-items: center; justify-content: center; font-size: 28px; }
+#arquero::after { content: '🧤'; }
+.balon-wrap { display: flex; justify-content: center; margin: 10px 0 6px; height: 56px; position: relative; }
+#balon { width: 52px; height: 52px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #f8fafc 0%, #e2e8f0 80%); box-shadow: inset -2px -2px 0 #9ca3af, inset 3px 3px 6px rgba(0,0,0,.3); position: absolute; transition: all .4s cubic-bezier(.4,0,.2,1); left: calc(50% - 26px); top: 0; }
+.penalty-line { width: 60px; height: 3px; background: rgba(255,255,255,.45); margin: 0 auto; border-radius: 2px; }
+.field-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 30px; font-weight: 900; text-shadow: 0 2px 20px rgba(0,0,0,.9); pointer-events: none; opacity: 0; transition: opacity .3s; white-space: nowrap; }
+.field-msg.show { opacity: 1; }
+.field-msg.gol  { color: #4ade80; }
+.field-msg.ataj { color: var(--red); }
+
+.dir-btns { display: flex; gap: 8px; margin-bottom: 12px; }
+.btn-dir { flex: 1; padding: 14px 0; background: var(--card); border: 1px solid var(--border2); border-radius: 12px; color: var(--text); font-size: 22px; cursor: pointer; transition: background .15s, border-color .15s, transform .1s; font-family: 'Syne', sans-serif; }
+.btn-dir:hover:not(:disabled) { background: #1e1e1e; border-color: #3a3a3a; }
+.btn-dir:active:not(:disabled) { transform: scale(.96); }
+.btn-dir:disabled { opacity: .3; cursor: not-allowed; }
+.btn-dir .dir-label { display: block; font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+.bet-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+.bet-row label { font-size: 12px; color: var(--muted2); white-space: nowrap; text-transform: uppercase; font-family: 'Space Mono', monospace; }
+.bet-row input { flex: 1; min-width: 0; }
+
+.btn-apostar { width: 100%; padding: 14px; background: var(--green); color: #000; font-weight: 800; font-size: 15px; border: none; border-radius: 12px; cursor: pointer; margin-bottom: 10px; transition: background .2s, transform .1s; font-family: 'Syne', sans-serif; }
+.btn-apostar:hover:not(:disabled) { background: var(--green-dark); }
+.btn-apostar:active:not(:disabled) { transform: scale(.98); }
+.btn-apostar:disabled { background: #1a1a1a; color: #444; cursor: not-allowed; }
+
+.btn-retirar { width: 100%; padding: 14px; background: #0d0d0d; border: 1px solid var(--gold); color: var(--gold); font-weight: 800; font-size: 15px; border-radius: 12px; cursor: pointer; transition: background .2s; margin-bottom: 14px; font-family: 'Syne', sans-serif; }
+.btn-retirar:hover:not(:disabled) { background: #1a1200; }
+.btn-retirar:disabled { opacity: .3; cursor: not-allowed; }
+
+.historial-title { font-size: 11px; color: #333; text-align: left; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .8px; font-family: 'Space Mono', monospace; }
+.historial { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.tick { font-size: 18px; background: var(--card); border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+
+#resultado { font-size: 13px; color: var(--muted2); min-height: 20px; font-family: 'Space Mono', monospace; }
+
+/* ── RULETA ── */
+#roulettePanel { padding-bottom: 8px; }
+.roulette-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 16px; }
+#rouletteCanvas { border-radius: 50%; box-shadow: 0 0 40px rgba(34,197,94,.15), 0 0 0 4px #1a1a1a, 0 0 0 6px #222; display: block; }
+.roulette-arrow { font-size: 28px; margin-bottom: 6px; }
+
+.roulette-bets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.roul-bet-btn { padding: 12px; border-radius: 10px; border: 2px solid transparent; font-size: 13px; font-weight: 700; cursor: pointer; transition: all .15s; font-family: 'Syne', sans-serif; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.roul-bet-btn span.mult { font-size: 10px; font-family: 'Space Mono', monospace; opacity: .8; }
+.roul-bet-btn.selected { border-color: var(--text); transform: scale(1.02); }
+.roul-bet-btn:disabled { opacity: .35; cursor: not-allowed; }
+.roul-btn-red   { background: #450a0a; color: #fca5a5; }
+.roul-btn-red.selected { border-color: var(--red); }
+.roul-btn-black { background: #111; color: #ccc; border: 2px solid #333; }
+.roul-btn-black.selected { border-color: var(--text); }
+.roul-btn-green { background: #052e16; color: #86efac; }
+.roul-btn-green.selected { border-color: var(--green); }
+.roul-btn-odd   { background: #1c1917; color: #d6d3d1; }
+.roul-btn-odd.selected { border-color: #78716c; }
+.roul-btn-even  { background: #1c1917; color: #d6d3d1; }
+.roul-btn-even.selected { border-color: #78716c; }
+.roul-btn-half1 { background: #0f172a; color: #93c5fd; }
+.roul-btn-half2 { background: #0f172a; color: #93c5fd; }
+
+.bet-row-r { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+.bet-row-r label { font-size: 12px; color: var(--muted2); white-space: nowrap; text-transform: uppercase; font-family: 'Space Mono', monospace; }
+.bet-row-r input { flex: 1; }
+
+.btn-girar { width: 100%; padding: 14px; background: var(--green); color: #000; font-weight: 800; font-size: 15px; border: none; border-radius: 12px; cursor: pointer; transition: background .2s; font-family: 'Syne', sans-serif; margin-bottom: 10px; }
+.btn-girar:hover:not(:disabled) { background: var(--green-dark); }
+.btn-girar:disabled { background: #1a1a1a; color: #444; cursor: not-allowed; }
+#rouletteResult { font-size: 13px; color: var(--muted2); min-height: 20px; font-family: 'Space Mono', monospace; text-align: center; }
+.roul-number-display { font-size: 42px; font-weight: 800; min-height: 52px; margin-bottom: 4px; text-align: center; font-family: 'Space Mono', monospace; }
+
+/* ── ADMIN ── */
+#adminPanel { display: none; width: 100%; max-width: 680px; padding: 16px; position: relative; z-index: 1; }
+.admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.admin-header .logo { font-size: 22px; font-weight: 800; }
+.admin-header .logo span { color: var(--green); }
+.admin-tag { background: var(--green); color: #000; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 6px; font-family: 'Space Mono', monospace; letter-spacing: .5px; }
+
+.admin-grid { display: grid; grid-template-columns: 240px 1fr; gap: 16px; }
+.admin-sidebar { display: flex; flex-direction: column; gap: 6px; }
+.admin-nav-btn { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; color: var(--muted2); font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s; text-align: left; font-family: 'Syne', sans-serif; }
+.admin-nav-btn:hover { background: var(--card2); color: var(--text); border-color: #333; }
+.admin-nav-btn.active { background: var(--card2); color: var(--green); border-color: var(--green); }
+.admin-nav-btn .icon { font-size: 18px; width: 24px; text-align: center; }
+
+.admin-content { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; min-height: 400px; }
+.admin-section { display: none; }
+.admin-section.active { display: block; }
+.admin-section h3 { font-size: 18px; font-weight: 800; margin-bottom: 20px; }
+
+/* Users list */
+.user-card { background: #0d0d0d; border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 10px; }
+.user-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.user-card-name { font-weight: 800; font-size: 15px; }
+.user-card-email { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; }
+.badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; font-family: 'Space Mono', monospace; }
+.badge.admin { background: rgba(245,158,11,.15); color: var(--gold); border: 1px solid rgba(245,158,11,.3); }
+.badge.usuario { background: rgba(34,197,94,.1); color: var(--green); border: 1px solid rgba(34,197,94,.2); }
+.user-card-saldo { font-size: 20px; font-weight: 800; color: var(--green); margin-bottom: 12px; }
+.user-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.admin-input { background: #111; border: 1px solid var(--border2); border-radius: 8px; color: var(--text); padding: 8px 12px; font-size: 13px; outline: none; font-family: 'Syne', sans-serif; width: 110px; }
+.admin-input:focus { border-color: var(--green); }
+.btn-admin { border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: 'Syne', sans-serif; transition: all .15s; }
+.btn-admin:active { transform: scale(.96); }
+.btn-add    { background: var(--green); color: #000; }
+.btn-add:hover { background: var(--green-dark); }
+.btn-remove { background: var(--red); color: #fff; }
+.btn-remove:hover { background: #dc2626; }
+.btn-role   { background: #1f2937; color: #93c5fd; border: 1px solid #374151; }
+.btn-role:hover { background: #263244; }
+.btn-del    { background: #1a0505; color: #fca5a5; border: 1px solid #450a0a; }
+.btn-del:hover { background: #2d0808; }
+
+/* Settings */
+.settings-group { margin-bottom: 24px; }
+.settings-group h4 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; font-family: 'Space Mono', monospace; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.settings-row { margin-bottom: 14px; }
+.settings-row label { font-size: 12px; color: var(--muted2); margin-bottom: 6px; display: block; text-align: left; text-transform: uppercase; letter-spacing: .5px; font-family: 'Space Mono', monospace; }
+.settings-row input { width: 100%; }
+.btn-save { padding: 11px 24px; background: var(--green); color: #000; font-weight: 800; font-size: 13px; border: none; border-radius: 10px; cursor: pointer; font-family: 'Syne', sans-serif; transition: background .2s; }
+.btn-save:hover { background: var(--green-dark); }
+.notice { font-size: 12px; padding: 10px 14px; border-radius: 8px; font-family: 'Space Mono', monospace; margin-top: 10px; }
+.notice.ok  { background: rgba(34,197,94,.1); color: var(--green); border: 1px solid rgba(34,197,94,.2); }
+.notice.err { background: rgba(239,68,68,.1); color: var(--red); border: 1px solid rgba(239,68,68,.2); }
+
+/* Stats panel */
+.stat-big { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stat-big-card { background: #0d0d0d; border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.stat-big-card .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; font-family: 'Space Mono', monospace; margin-bottom: 8px; }
+.stat-big-card .val { font-size: 26px; font-weight: 800; }
+
+@media (max-width: 620px) {
+  #login { width: 95vw; padding: 32px 24px; }
+  .admin-grid { grid-template-columns: 1fr; }
+  .admin-sidebar { flex-direction: row; flex-wrap: wrap; }
+  .admin-nav-btn { flex: 1 1 calc(50% - 3px); }
+  #casino { padding: 12px; }
+  .stats { grid-template-columns: 1fr 1fr 1fr; }
+}
 </style>
 </head>
 <body>
 
+<!-- LOADING -->
+<div id="loadingScreen">
+  <div class="loading-logo">Black<span>casino</span> ⚽</div>
+  <div class="loading-bar"><div class="loading-bar-inner"></div></div>
+</div>
+
 <!-- LOGIN -->
-<div id="login">
+<div id="login" style="display:none;">
   <div class="logo">Black<span>casino</span> ⚽</div>
-  <div class="sub">Penales · Gana o pierde todo</div>
+  <div class="sub">Penales · Ruleta · Gana</div>
   <div class="login-tabs">
     <button class="login-tab active" onclick="switchTab('login')">Iniciar sesión</button>
     <button class="login-tab" onclick="switchTab('signup')">Registrarse</button>
   </div>
+
+  <!-- LOGIN FORM -->
   <div id="loginForm" class="login-form active">
-    <label>Usuario</label>
-    <input id="user" type="text" placeholder="Tu usuario" autocomplete="off">
+    <label>Usuario o correo</label>
+    <input id="user" type="text" placeholder="Tu usuario o email" autocomplete="off">
     <label>Contraseña</label>
-    <input id="pass" type="password" placeholder="••••••">
-    <button class="btn-login" onclick="login()">Entrar</button>
+    <div class="pass-wrap">
+      <input id="pass" type="password" placeholder="••••••">
+      <button class="toggle-pass" onclick="togglePass('pass')">👁</button>
+    </div>
+    <button class="btn-login" onclick="login()">Entrar →</button>
     <div class="err" id="loginErr"></div>
     <a class="creditos-link" onclick="abrirCreditos()">💳 ¿Cómo cargar créditos?</a>
   </div>
+
+  <!-- SIGNUP FORM -->
   <div id="signupForm" class="login-form">
-    <label>Nuevo usuario</label>
+    <label>Usuario</label>
     <input id="newUser" type="text" placeholder="Elige un usuario" autocomplete="off">
+    <label>Correo electrónico</label>
+    <input id="newEmail" type="email" placeholder="tucorreo@email.com" autocomplete="off">
     <label>Contraseña</label>
-    <input id="newPass" type="password" placeholder="••••••">
+    <div class="pass-wrap">
+      <input id="newPass" type="password" placeholder="Mínimo 8 caracteres" oninput="evalPass(this.value)">
+      <button class="toggle-pass" onclick="togglePass('newPass')">👁</button>
+    </div>
+    <div class="pass-strength"><div class="pass-strength-bar" id="strengthBar"></div></div>
+    <div class="strength-hint" id="strengthHint" style="color:var(--muted)"></div>
     <label>Confirmar contraseña</label>
-    <input id="newPass2" type="password" placeholder="••••••">
-    <button class="btn-login" onclick="registrarse()">Crear cuenta</button>
-    <div class="err" id="signupErr"></div>
+    <div class="pass-wrap">
+      <input id="newPass2" type="password" placeholder="Repetí la contraseña">
+      <button class="toggle-pass" onclick="togglePass('newPass2')">👁</button>
+    </div>
+    <button class="btn-login" onclick="registrarse()">Crear cuenta →</button>
+    <div id="signupMsg"></div>
   </div>
 </div>
 
 <!-- MODAL CRÉDITOS -->
-<div id="creditosModal">
-  <div class="creditos-content">
+<div id="creditosModal" class="modal">
+  <div class="modal-content">
     <h2>💳 Cargar Créditos</h2>
     <p>Bienvenido a <strong>Blackcasino</strong>, somos de la Ciudad de San Roque González de Santa Cruz. Elige cómo deseas cargar tu crédito:</p>
-    <div class="creditos-metodo">
+    <div class="metodo">
       <div class="titulo">📱 Vía WhatsApp</div>
-      <div class="detalle">Contacta a nuestro equipo en: <strong>+595 992 809980</strong><br>Cuéntanos el monto que deseas cargar y te guiaremos.</div>
+      <div class="detalle">Contactá a nuestro equipo: <strong>+595 992 809980</strong><br>Cuéntanos el monto y te guiamos.</div>
     </div>
-    <div class="creditos-metodo">
+    <div class="metodo">
       <div class="titulo">📧 Por Correo</div>
-      <div class="detalle">Email: <strong>evergitasanchez@gmail.com</strong><br>Envía tu solicitud de carga con tu usuario.</div>
+      <div class="detalle">Email: <strong>evergitasanchez@gmail.com</strong><br>Enviá tu solicitud con tu usuario.</div>
     </div>
-    <div class="creditos-metodo">
-      <div class="titulo">🧾 Sube tu comprobante en la web</div>
-      <div class="detalle">Realiza una transferencia y sube tu comprobante. Te acreditaremos al instante en tu cuenta.</div>
+    <div class="metodo">
+      <div class="titulo">🧾 Subí tu comprobante</div>
+      <div class="detalle">Realizá una transferencia y subí tu comprobante. Te acreditamos al instante.</div>
     </div>
-    <p style="margin-top:16px;color:#22c55e;text-align:center;font-weight:700;">By Iván<br>Somos tu aliado en juegos de penales con los mejores premios.<br>Gracias por preferir Blackcasino el que te da más.</p>
-    <button class="btn-close-creditos" onclick="cerrarCreditos()">Cerrar</button>
+    <p style="margin-top:16px;color:var(--green);text-align:center;font-weight:700;">By Iván — Somos tu aliado en juegos de penales con los mejores premios.<br>¡Gracias por preferir Blackcasino!</p>
+    <button class="btn-close" onclick="cerrarCreditos()">Cerrar</button>
   </div>
 </div>
 
-<!-- CASINO -->
+<!-- CASINO JUEGO -->
 <div id="casino">
   <div class="header">
-    <div class="logo">Black<span>casino</span> ⚽</div>
-    <div>
+    <div class="logo">Black<span>casino</span></div>
+    <div class="header-right">
       <span class="user-info" id="userLabel"></span>
       <button class="btn-logout" onclick="logout()">Salir</button>
     </div>
   </div>
+
   <div class="stats">
     <div class="stat-card">
-      <div class="label">Saldo</div>
-      <div class="value" id="saldoDisplay">0 Gs</div>
+      <div class="lbl">Saldo</div>
+      <div class="val" id="saldoDisplay">0 Gs</div>
     </div>
     <div class="stat-card">
-      <div class="label">Premio acumulado</div>
-      <div class="value green" id="premioDisplay">0 Gs</div>
+      <div class="lbl">Premio</div>
+      <div class="val green" id="premioDisplay">0 Gs</div>
     </div>
     <div class="stat-card">
-      <div class="label">Multiplicador</div>
-      <div class="value green" id="multiDisplay">x1</div>
+      <div class="lbl">Multi</div>
+      <div class="val green" id="multiDisplay">x1</div>
     </div>
   </div>
-  <div class="field">
-    <div class="arco">
-      <div class="arquero-wrap">
-        <div id="arquero"></div>
+
+  <div class="game-tabs">
+    <button class="game-tab active" onclick="switchGame('penales')">⚽ Penales</button>
+    <button class="game-tab" onclick="switchGame('ruleta')">🎡 Ruleta</button>
+  </div>
+
+  <!-- PENALES -->
+  <div id="penalesPanel" class="game-panel active">
+    <div class="field">
+      <div class="arco">
+        <div class="arquero-wrap">
+          <div id="arquero"></div>
+        </div>
       </div>
+      <div class="balon-wrap"><div id="balon"></div></div>
+      <div class="penalty-line"></div>
+      <div class="field-msg" id="fieldMsg"></div>
     </div>
-    <div class="balon-wrap">
-      <div id="balon"></div>
+    <div class="dir-btns">
+      <button class="btn-dir" id="btnIzq" onclick="tirar('izq')" disabled>⬅️<span class="dir-label">Izquierda</span></button>
+      <button class="btn-dir" id="btnCen" onclick="tirar('centro')" disabled>⬆️<span class="dir-label">Centro</span></button>
+      <button class="btn-dir" id="btnDer" onclick="tirar('der')" disabled>➡️<span class="dir-label">Derecha</span></button>
     </div>
-    <div class="penalty-line"></div>
-    <div class="field-msg" id="fieldMsg"></div>
+    <div class="bet-row">
+      <label>Apuesta:</label>
+      <input id="inputApuesta" type="number" min="5000" step="5000" value="20000">
+    </div>
+    <button class="btn-apostar" id="btnApostar" onclick="apostar()">Apostar 20.000 Gs</button>
+    <button class="btn-retirar" id="btnRetirar" onclick="retirar()" disabled>💰 Retirar premio</button>
+    <div class="historial-title">Historial de tiros</div>
+    <div class="historial" id="historial"></div>
+    <p id="resultado"></p>
   </div>
-  <div class="dir-btns">
-    <button class="btn-dir" id="btnIzq" onclick="tirar('izq')" disabled>⬅️<span class="dir-label">Izquierda</span></button>
-    <button class="btn-dir" id="btnCen" onclick="tirar('centro')" disabled>⬆️<span class="dir-label">Centro</span></button>
-    <button class="btn-dir" id="btnDer" onclick="tirar('der')" disabled>➡️<span class="dir-label">Derecha</span></button>
+
+  <!-- RULETA -->
+  <div id="ruletaPanel" class="game-panel">
+    <div class="roulette-wrap">
+      <div class="roulette-arrow">▼</div>
+      <canvas id="rouletteCanvas" width="300" height="300"></canvas>
+      <div class="roul-number-display" id="roulNumberDisplay">—</div>
+    </div>
+    <div class="roulette-bets">
+      <button class="roul-bet-btn roul-btn-red" onclick="selectRoulBet('rojo')" id="rb-rojo" disabled>
+        🔴 Rojo<span class="mult">x2</span>
+      </button>
+      <button class="roul-bet-btn roul-btn-black" onclick="selectRoulBet('negro')" id="rb-negro" disabled>
+        ⚫ Negro<span class="mult">x2</span>
+      </button>
+      <button class="roul-bet-btn roul-btn-green" onclick="selectRoulBet('verde')" id="rb-verde" disabled>
+        🟢 Verde (0)<span class="mult">x14</span>
+      </button>
+      <button class="roul-bet-btn roul-btn-odd" onclick="selectRoulBet('impar')" id="rb-impar" disabled>
+        🔢 Impar<span class="mult">x2</span>
+      </button>
+      <button class="roul-bet-btn roul-btn-even" onclick="selectRoulBet('par')" id="rb-par" disabled>
+        🔢 Par<span class="mult">x2</span>
+      </button>
+      <button class="roul-bet-btn roul-btn-half1" onclick="selectRoulBet('bajo')" id="rb-bajo" disabled>
+        📉 1-18<span class="mult">x2</span>
+      </button>
+    </div>
+    <div class="bet-row-r">
+      <label>Apuesta:</label>
+      <input id="inputRuleta" type="number" min="5000" step="5000" value="20000">
+    </div>
+    <button class="btn-girar" id="btnGirar" onclick="girarRuleta()" disabled>Apostar y Girar</button>
+    <p id="rouletteResult"></p>
   </div>
-  <div class="bet-control">
-    <label for="inputApuesta">Apuesta:</label>
-    <input id="inputApuesta" type="number" min="5000" step="5000" value="20000" />
-  </div>
-  <button class="btn-apostar" id="btnApostar" onclick="apostar()">Apostar 20.000 Gs</button>
-  <button class="btn-retirar" id="btnRetirar" onclick="retirar()" disabled>💰 Retirar premio</button>
-  <div class="historial-title">Historial de tiros</div>
-  <div class="historial" id="historial"></div>
-  <p id="resultado"></p>
 </div>
 
-<!-- ADMIN -->
+<!-- ADMIN PANEL -->
 <div id="adminPanel">
-  <h2>👑 Panel Admin</h2>
-  <div id="userList"></div>
-  <button class="btn-logout" style="margin-top:16px" onclick="logout()">Cerrar sesión</button>
+  <div class="admin-header">
+    <div class="logo">Black<span>casino</span> <span class="admin-tag">ADMIN</span></div>
+    <button class="btn-logout" onclick="logout()">Salir</button>
+  </div>
+  <div class="admin-grid">
+    <div class="admin-sidebar">
+      <button class="admin-nav-btn active" onclick="adminNav('users')" id="nav-users">
+        <span class="icon">👥</span> Usuarios
+      </button>
+      <button class="admin-nav-btn" onclick="adminNav('stats')" id="nav-stats">
+        <span class="icon">📊</span> Estadísticas
+      </button>
+      <button class="admin-nav-btn" onclick="adminNav('settings')" id="nav-settings">
+        <span class="icon">⚙️</span> Mi cuenta
+      </button>
+    </div>
+    <div class="admin-content">
+
+      <!-- USUARIOS -->
+      <div class="admin-section active" id="sec-users">
+        <h3>👥 Gestión de usuarios</h3>
+        <div id="userList"></div>
+      </div>
+
+      <!-- STATS -->
+      <div class="admin-section" id="sec-stats">
+        <h3>📊 Estadísticas</h3>
+        <div class="stat-big" id="adminStats"></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="admin-section" id="sec-settings">
+        <h3>⚙️ Mi cuenta</h3>
+        <div class="settings-group">
+          <h4>Cambiar usuario</h4>
+          <div class="settings-row">
+            <label>Nuevo usuario</label>
+            <input type="text" id="adminNewUser" placeholder="Nuevo nombre de usuario">
+          </div>
+          <button class="btn-save" onclick="adminCambiarUsuario()">Guardar usuario</button>
+          <div id="noticeUsuario"></div>
+        </div>
+        <div class="settings-group">
+          <h4>Cambiar correo</h4>
+          <div class="settings-row">
+            <label>Nuevo correo</label>
+            <input type="email" id="adminNewEmail" placeholder="nuevo@correo.com">
+          </div>
+          <button class="btn-save" onclick="adminCambiarCorreo()">Guardar correo</button>
+          <div id="noticeCorreo"></div>
+        </div>
+        <div class="settings-group">
+          <h4>Cambiar contraseña</h4>
+          <div class="settings-row">
+            <label>Contraseña actual</label>
+            <div class="pass-wrap">
+              <input type="password" id="adminOldPass" placeholder="••••••">
+              <button class="toggle-pass" onclick="togglePass('adminOldPass')">👁</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <label>Nueva contraseña</label>
+            <div class="pass-wrap">
+              <input type="password" id="adminNewPass" placeholder="Mínimo 8 caracteres" oninput="evalPass2(this.value)">
+              <button class="toggle-pass" onclick="togglePass('adminNewPass')">👁</button>
+            </div>
+            <div class="pass-strength" style="margin-top:6px"><div class="pass-strength-bar" id="strengthBar2"></div></div>
+            <div class="strength-hint" id="strengthHint2" style="color:var(--muted)"></div>
+          </div>
+          <div class="settings-row">
+            <label>Confirmar nueva contraseña</label>
+            <div class="pass-wrap">
+              <input type="password" id="adminNewPass2" placeholder="Repetí la contraseña">
+              <button class="toggle-pass" onclick="togglePass('adminNewPass2')">👁</button>
+            </div>
+          </div>
+          <button class="btn-save" onclick="adminCambiarPass()">Cambiar contraseña</button>
+          <div id="noticePass"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
-<!-- Firebase SDKs -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
 <script>
-// ── FIREBASE CONFIG ──────────────────────────────────────
+// ── FIREBASE ──────────────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyB15Y32QkVMCx2LvR8AK6UGlcesIUHs3-Y",
   authDomain: "blackstore-99034.firebaseapp.com",
@@ -255,364 +563,521 @@ const firebaseConfig = {
   messagingSenderId: "930634558088",
   appId: "1:930634558088:web:5b23568d24511797d94d3d"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ── ESTADO ───────────────────────────────────────────────
+// ── ESTADO ────────────────────────────────────────────────
 let usuarios = [
-  { usuario: 'admin', pass: '1234', saldo: 0,      rol: 'admin'   },
-  { usuario: 'ivan',  pass: '123',  saldo: 100000, rol: 'usuario' },
+  { usuario: 'admin', pass: '1234', email: 'admin@blackcasino.com', saldo: 0, rol: 'admin' },
+  { usuario: 'ivan',  pass: '123',  email: 'ivan@example.com', saldo: 100000, rol: 'usuario' },
 ];
-let currentUser = null;
-let premio      = 0;
-let jugando     = false;
-let apuestaBase = 20000;
-let historial   = [];
-let animando    = false;
-let firebaseOk  = false;
-
+let currentUser = null, premio = 0, jugando = false;
+let apuestaBase = 20000, historialArr = [], animando = false, firebaseOk = false;
 const MIN_APUESTA = 5000;
-const POS_ARQUERO = { izq: '10%', centro: 'calc(50% - 20px)', der: 'calc(90% - 40px)' };
-const POS_BALON   = { izq: '15%', centro: 'calc(50% - 26px)', der: 'calc(75% - 26px)' };
+const POS_ARQ = { izq:'10%', centro:'calc(50% - 20px)', der:'calc(90% - 40px)' };
+const POS_BAL = { izq:'15%', centro:'calc(50% - 26px)', der:'calc(75% - 26px)' };
 
-// ── FIREBASE: CARGAR ─────────────────────────────────────
-function cargarUsuarios(callback) {
-  db.ref('usuarios').once('value')
-    .then(snap => {
-      const data = snap.val();
-      if (data) {
-        usuarios = Object.values(data);
-      } else {
-        guardarUsuarios();
-      }
-      firebaseOk = true;
-      if (callback) callback();
-    })
-    .catch(err => {
-      console.warn('Firebase no disponible, usando localStorage:', err.message);
-      firebaseOk = false;
-      const local = localStorage.getItem('blackcasino_users');
-      if (local) {
-        try { usuarios = JSON.parse(local); } catch(e) {}
-      }
-      if (callback) callback();
-    });
+// ── FIREBASE helpers ──────────────────────────────────────
+function cargarUsuarios(cb) {
+  db.ref('usuarios').once('value').then(snap => {
+    const d = snap.val();
+    if (d) usuarios = Object.values(d);
+    else guardarUsuarios();
+    firebaseOk = true;
+    if (cb) cb();
+  }).catch(err => {
+    console.warn('Firebase no disponible:', err.message);
+    firebaseOk = false;
+    const local = localStorage.getItem('blackcasino_users');
+    if (local) try { usuarios = JSON.parse(local); } catch(e) {}
+    if (cb) cb();
+  });
 }
-
-// ── FIREBASE: GUARDAR ────────────────────────────────────
 function guardarUsuarios() {
   localStorage.setItem('blackcasino_users', JSON.stringify(usuarios));
   if (!firebaseOk) return;
   const obj = {};
   usuarios.forEach((u, i) => { obj[i] = u; });
-  db.ref('usuarios').set(obj).catch(err => {
-    console.warn('Error al guardar en Firebase:', err.message);
-  });
+  db.ref('usuarios').set(obj).catch(e => console.warn('Error guardar:', e.message));
 }
-
-// ── SESIÓN PERSISTENTE ───────────────────────────────────
-function guardarSesion(usuario) {
-  localStorage.setItem('blackcasino_session', usuario);
-}
-
-function borrarSesion() {
-  localStorage.removeItem('blackcasino_session');
-}
-
+function guardarSesion(u) { localStorage.setItem('blackcasino_session', u); }
+function borrarSesion()   { localStorage.removeItem('blackcasino_session'); }
 function restaurarSesion() {
-  const sesionGuardada = localStorage.getItem('blackcasino_session');
-  if (!sesionGuardada) return false;
-  const user = usuarios.find(x => x.usuario === sesionGuardada);
-  if (!user) return false;
-  currentUser = user;
+  const s = localStorage.getItem('blackcasino_session');
+  if (!s) return false;
+  const u = usuarios.find(x => x.usuario === s);
+  if (!u) return false;
+  currentUser = u;
   document.getElementById('login').style.display = 'none';
-  if (user.rol === 'admin') {
-    document.getElementById('adminPanel').style.display = 'block';
-    renderAdmin();
-  } else {
-    document.getElementById('casino').style.display = 'block';
-    document.getElementById('userLabel').textContent = '👤 ' + user.usuario;
-    resetJuego();
-  }
+  if (u.rol === 'admin') { showAdmin(); }
+  else { showCasino(); }
   return true;
 }
 
-// ── LOGIN ─────────────────────────────────────────────────
+// ── LOADING ───────────────────────────────────────────────
+window.addEventListener('load', () => {
+  cargarUsuarios(() => {
+    setTimeout(() => {
+      document.getElementById('loadingScreen').style.opacity = '0';
+      document.getElementById('loadingScreen').style.transition = 'opacity .4s';
+      setTimeout(() => {
+        document.getElementById('loadingScreen').style.display = 'none';
+        if (!restaurarSesion()) {
+          document.getElementById('login').style.display = 'block';
+        }
+      }, 400);
+    }, 1500);
+  });
+});
+
+// ── TABS LOGIN ────────────────────────────────────────────
 function switchTab(tab) {
-  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.login-form').forEach(f => f.classList.remove('active'));
-  document.getElementById('loginErr').textContent  = '';
-  document.getElementById('signupErr').textContent = '';
-  if (tab === 'login') {
-    document.querySelectorAll('.login-tab')[0].classList.add('active');
-    document.getElementById('loginForm').classList.add('active');
-  } else {
-    document.querySelectorAll('.login-tab')[1].classList.add('active');
-    document.getElementById('signupForm').classList.add('active');
-  }
+  document.querySelectorAll('.login-tab').forEach((t,i) => t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='signup'&&i===1)));
+  document.getElementById('loginForm').classList.toggle('active', tab==='login');
+  document.getElementById('signupForm').classList.toggle('active', tab==='signup');
+  document.getElementById('loginErr').textContent = '';
+  document.getElementById('signupMsg').innerHTML = '';
 }
 
+// ── CONTRASEÑA SEGURA ─────────────────────────────────────
+function evalPass(val) {
+  const bar = document.getElementById('strengthBar');
+  const hint = document.getElementById('strengthHint');
+  evalPassGeneric(val, bar, hint);
+}
+function evalPass2(val) {
+  const bar = document.getElementById('strengthBar2');
+  const hint = document.getElementById('strengthHint2');
+  evalPassGeneric(val, bar, hint);
+}
+function evalPassGeneric(val, bar, hint) {
+  let score = 0;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  const levels = [
+    { w:'0%', color:'transparent', text:'' },
+    { w:'25%', color:'#ef4444', text:'⚠ Muy débil' },
+    { w:'50%', color:'#f59e0b', text:'🔶 Débil' },
+    { w:'75%', color:'#3b82f6', text:'🔷 Media' },
+    { w:'100%', color:'#22c55e', text:'✅ Fuerte' },
+  ];
+  const lv = levels[score] || levels[0];
+  bar.style.width = lv.w;
+  bar.style.background = lv.color;
+  hint.style.color = lv.color;
+  hint.textContent = lv.text;
+  return score;
+}
+function passSegura(val) { return val.length >= 8; }
+function togglePass(id) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+// ── REGISTRO ──────────────────────────────────────────────
 function registrarse() {
   const u  = document.getElementById('newUser').value.trim();
+  const em = document.getElementById('newEmail').value.trim();
   const p  = document.getElementById('newPass').value;
   const p2 = document.getElementById('newPass2').value;
-  const err = document.getElementById('signupErr');
-  if (!u || !p || !p2)         { err.textContent = 'Completá todos los campos.'; return; }
-  if (p.length < 3)            { err.textContent = 'Contraseña mínimo 3 caracteres.'; return; }
-  if (p !== p2)                { err.textContent = 'Las contraseñas no coinciden.'; return; }
-  if (usuarios.find(x => x.usuario === u)) { err.textContent = 'Ese usuario ya existe.'; return; }
-  usuarios.push({ usuario: u, pass: p, saldo: 0, rol: 'usuario' });
+  const msgEl = document.getElementById('signupMsg');
+  const showMsg = (txt, ok) => { msgEl.innerHTML = `<div class="${ok?'ok':'err'}">${txt}</div>`; };
+  if (!u || !em || !p || !p2) { showMsg('Completá todos los campos.', false); return; }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { showMsg('Correo electrónico inválido.', false); return; }
+  if (!passSegura(p)) { showMsg('La contraseña debe tener al menos 8 caracteres.', false); return; }
+  if (p !== p2) { showMsg('Las contraseñas no coinciden.', false); return; }
+  if (usuarios.find(x => x.usuario === u)) { showMsg('Ese usuario ya existe.', false); return; }
+  if (usuarios.find(x => x.email === em)) { showMsg('Ese correo ya está registrado.', false); return; }
+  usuarios.push({ usuario: u, pass: p, email: em, saldo: 0, rol: 'usuario' });
   guardarUsuarios();
-  err.style.color = '#22c55e';
-  err.textContent = '✓ Cuenta creada. Ya podés iniciar sesión.';
-  setTimeout(() => { switchTab('login'); err.textContent = ''; err.style.color = '#ef4444'; }, 1800);
+  showMsg('✓ ¡Cuenta creada! Ya podés iniciar sesión.', true);
+  setTimeout(() => { switchTab('login'); }, 1800);
   document.getElementById('newUser').value = '';
+  document.getElementById('newEmail').value = '';
   document.getElementById('newPass').value = '';
   document.getElementById('newPass2').value = '';
 }
 
+// ── LOGIN ─────────────────────────────────────────────────
 function login() {
-  const u = document.getElementById('user').value.trim();
-  const p = document.getElementById('pass').value;
-  const user = usuarios.find(x => x.usuario === u && x.pass === p);
-  if (!user) { document.getElementById('loginErr').textContent = 'Usuario o contraseña incorrecta.'; return; }
+  const raw = document.getElementById('user').value.trim();
+  const p   = document.getElementById('pass').value;
+  const user = usuarios.find(x => (x.usuario === raw || x.email === raw) && x.pass === p);
+  if (!user) { document.getElementById('loginErr').textContent = '❌ Usuario o contraseña incorrecta.'; return; }
   currentUser = user;
-  guardarSesion(user.usuario); // ← guardar sesión al entrar
+  guardarSesion(user.usuario);
   document.getElementById('loginErr').textContent = '';
   document.getElementById('login').style.display = 'none';
-  if (user.rol === 'admin') {
-    document.getElementById('adminPanel').style.display = 'block';
-    renderAdmin();
-  } else {
-    document.getElementById('casino').style.display = 'block';
-    document.getElementById('userLabel').textContent = '👤 ' + user.usuario;
-    resetJuego();
-  }
+  if (user.rol === 'admin') showAdmin();
+  else showCasino();
 }
-
 function logout() {
-  borrarSesion(); // ← borrar sesión al salir
-  currentUser = null;
-  premio = 0; jugando = false; historial = [];
-  document.getElementById('login').style.display = 'flex';
+  borrarSesion();
+  currentUser = null; premio = 0; jugando = false; historialArr = [];
+  document.getElementById('login').style.display = 'block';
   document.getElementById('casino').style.display = 'none';
   document.getElementById('adminPanel').style.display = 'none';
   document.getElementById('user').value = '';
   document.getElementById('pass').value = '';
 }
-
+function showCasino() {
+  document.getElementById('casino').style.display = 'block';
+  document.getElementById('userLabel').textContent = '👤 ' + currentUser.usuario;
+  resetJuego();
+  drawRoulette();
+}
+function showAdmin() {
+  document.getElementById('adminPanel').style.display = 'block';
+  renderAdmin();
+}
 function abrirCreditos()  { document.getElementById('creditosModal').classList.add('show'); }
 function cerrarCreditos() { document.getElementById('creditosModal').classList.remove('show'); }
 
+// ── GAME TABS ─────────────────────────────────────────────
+function switchGame(g) {
+  document.querySelectorAll('.game-tab').forEach((t,i) => t.classList.toggle('active', (g==='penales'&&i===0)||(g==='ruleta'&&i===1)));
+  document.getElementById('penalesPanel').classList.toggle('active', g==='penales');
+  document.getElementById('ruletaPanel').classList.toggle('active', g==='ruleta');
+}
+
 // ── ADMIN ─────────────────────────────────────────────────
+function adminNav(sec) {
+  document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('nav-'+sec).classList.add('active');
+  document.getElementById('sec-'+sec).classList.add('active');
+  if (sec === 'stats') renderStats();
+}
 function renderAdmin() {
   const list = document.getElementById('userList');
   list.innerHTML = '';
   usuarios.filter(u => u.rol === 'usuario').forEach(u => {
-    const row = document.createElement('div');
-    row.className = 'user-row';
-    row.innerHTML = `
-      <span class="name">👤 ${u.usuario}</span>
-      <span class="sal">${u.saldo.toLocaleString()} Gs</span>
-      <div>
-        <input class="admin-input" type="number" id="add_${u.usuario}" placeholder="Gs" min="0" step="1000">
-        <button class="btn-add-saldo"    onclick="agregarSaldo('${u.usuario}')">+ Saldo</button>
-        <button class="btn-remove-saldo" onclick="quitarSaldo('${u.usuario}')">- Saldo</button>
+    const d = document.createElement('div');
+    d.className = 'user-card';
+    d.innerHTML = `
+      <div class="user-card-top">
+        <div>
+          <div class="user-card-name">👤 ${u.usuario}</div>
+          <div class="user-card-email">${u.email || 'Sin correo'}</div>
+        </div>
+        <span class="badge usuario">USUARIO</span>
+      </div>
+      <div class="user-card-saldo">${u.saldo.toLocaleString()} Gs</div>
+      <div class="user-actions">
+        <input class="admin-input" type="number" id="amt_${u.usuario}" placeholder="Monto Gs" min="0" step="1000">
+        <button class="btn-admin btn-add"    onclick="agregarSaldo('${u.usuario}')">+ Saldo</button>
+        <button class="btn-admin btn-remove" onclick="quitarSaldo('${u.usuario}')">− Saldo</button>
+        <button class="btn-admin btn-role"   onclick="hacerAdmin('${u.usuario}')">👑 Hacer admin</button>
+        <button class="btn-admin btn-del"    onclick="eliminarUser('${u.usuario}')">🗑 Eliminar</button>
       </div>`;
-    list.appendChild(row);
+    list.appendChild(d);
   });
+  if (!list.children.length) list.innerHTML = '<p style="color:var(--muted);font-size:13px">No hay usuarios registrados.</p>';
 }
-
+function renderStats() {
+  const users   = usuarios.filter(u => u.rol === 'usuario');
+  const total   = users.reduce((a,u) => a + u.saldo, 0);
+  const max     = users.length ? Math.max(...users.map(u => u.saldo)) : 0;
+  document.getElementById('adminStats').innerHTML = `
+    <div class="stat-big-card"><div class="lbl">Usuarios registrados</div><div class="val">${users.length}</div></div>
+    <div class="stat-big-card"><div class="lbl">Saldo total en juego</div><div class="val" style="color:var(--green)">${total.toLocaleString()} Gs</div></div>
+    <div class="stat-big-card"><div class="lbl">Mayor saldo individual</div><div class="val" style="color:var(--gold)">${max.toLocaleString()} Gs</div></div>
+    <div class="stat-big-card"><div class="lbl">Total de cuentas</div><div class="val">${usuarios.length}</div></div>`;
+}
 function agregarSaldo(nombre) {
-  const input = document.getElementById('add_' + nombre);
-  const monto = parseInt(input.value, 10);
-  if (!monto || monto <= 0) return;
-  const u = usuarios.find(x => x.usuario === nombre);
-  if (u) { u.saldo += monto; input.value = ''; guardarUsuarios(); renderAdmin(); }
+  const input = document.getElementById('amt_'+nombre);
+  const monto = parseInt(input.value,10);
+  if (!monto||monto<=0) return;
+  const u = usuarios.find(x=>x.usuario===nombre);
+  if (u) { u.saldo += monto; input.value=''; guardarUsuarios(); renderAdmin(); }
 }
-
 function quitarSaldo(nombre) {
-  const input = document.getElementById('add_' + nombre);
-  const monto = parseInt(input.value, 10);
-  if (!monto || monto <= 0) return;
-  const u = usuarios.find(x => x.usuario === nombre);
-  if (u) { u.saldo = Math.max(0, u.saldo - monto); input.value = ''; guardarUsuarios(); renderAdmin(); }
+  const input = document.getElementById('amt_'+nombre);
+  const monto = parseInt(input.value,10);
+  if (!monto||monto<=0) return;
+  const u = usuarios.find(x=>x.usuario===nombre);
+  if (u) { u.saldo = Math.max(0, u.saldo-monto); input.value=''; guardarUsuarios(); renderAdmin(); }
+}
+function hacerAdmin(nombre) {
+  if (!confirm(`¿Convertir a "${nombre}" en administrador? Tendrá acceso total.`)) return;
+  const u = usuarios.find(x=>x.usuario===nombre);
+  if (u) { u.rol='admin'; guardarUsuarios(); renderAdmin(); }
+}
+function eliminarUser(nombre) {
+  if (!confirm(`¿Eliminar permanentemente la cuenta de "${nombre}"?`)) return;
+  usuarios = usuarios.filter(x=>x.usuario!==nombre);
+  guardarUsuarios(); renderAdmin();
 }
 
-// ── JUEGO ─────────────────────────────────────────────────
+// ── ADMIN SETTINGS ────────────────────────────────────────
+function showNotice(id, msg, ok) {
+  const el = document.getElementById(id);
+  el.innerHTML = `<div class="notice ${ok?'ok':'err'}">${msg}</div>`;
+  setTimeout(() => { el.innerHTML=''; }, 3000);
+}
+function adminCambiarUsuario() {
+  const nu = document.getElementById('adminNewUser').value.trim();
+  if (!nu) { showNotice('noticeUsuario','⚠ Ingresá el nuevo usuario.',false); return; }
+  if (usuarios.find(x=>x.usuario===nu && x.usuario!==currentUser.usuario)) { showNotice('noticeUsuario','❌ Ese usuario ya existe.',false); return; }
+  currentUser.usuario = nu;
+  guardarUsuarios(); guardarSesion(nu);
+  document.getElementById('userLabel').textContent = '👤 '+nu;
+  showNotice('noticeUsuario','✅ Usuario actualizado.',true);
+  document.getElementById('adminNewUser').value='';
+}
+function adminCambiarCorreo() {
+  const ne = document.getElementById('adminNewEmail').value.trim();
+  if (!ne||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ne)) { showNotice('noticeCorreo','❌ Correo inválido.',false); return; }
+  if (usuarios.find(x=>x.email===ne && x.usuario!==currentUser.usuario)) { showNotice('noticeCorreo','❌ Ese correo ya está en uso.',false); return; }
+  currentUser.email = ne;
+  guardarUsuarios();
+  showNotice('noticeCorreo','✅ Correo actualizado.',true);
+  document.getElementById('adminNewEmail').value='';
+}
+function adminCambiarPass() {
+  const old = document.getElementById('adminOldPass').value;
+  const np  = document.getElementById('adminNewPass').value;
+  const np2 = document.getElementById('adminNewPass2').value;
+  if (old !== currentUser.pass) { showNotice('noticePass','❌ Contraseña actual incorrecta.',false); return; }
+  if (!passSegura(np)) { showNotice('noticePass','⚠ Nueva contraseña debe tener al menos 8 caracteres.',false); return; }
+  if (np !== np2) { showNotice('noticePass','❌ Las contraseñas nuevas no coinciden.',false); return; }
+  currentUser.pass = np;
+  guardarUsuarios();
+  showNotice('noticePass','✅ Contraseña actualizada.',true);
+  document.getElementById('adminOldPass').value='';
+  document.getElementById('adminNewPass').value='';
+  document.getElementById('adminNewPass2').value='';
+}
+
+// ── PENALES: JUEGO ────────────────────────────────────────
 function resetJuego() {
-  premio = 0; jugando = false; historial = [];
-  apuestaBase = leerApuesta();
+  premio=0; jugando=false; historialArr=[];
+  apuestaBase=leerApuesta();
   setDirBtns(false);
-  document.getElementById('btnApostar').disabled = false;
-  document.getElementById('btnRetirar').disabled = true;
-  document.getElementById('historial').innerHTML = '';
-  document.getElementById('resultado').textContent = '';
-  document.getElementById('fieldMsg').className = 'field-msg';
-  moverArquero('centro', false);
-  moverBalon('centro', false);
+  document.getElementById('btnApostar').disabled=false;
+  document.getElementById('btnRetirar').disabled=true;
+  document.getElementById('historial').innerHTML='';
+  document.getElementById('resultado').textContent='';
+  document.getElementById('fieldMsg').className='field-msg';
+  moverArquero('centro',false); moverBalon('centro',false);
   actualizar();
 }
-
 function actualizar() {
-  if (!currentUser || currentUser.rol !== 'usuario') return;
-  document.getElementById('saldoDisplay').textContent  = currentUser.saldo.toLocaleString() + ' Gs';
-  document.getElementById('premioDisplay').textContent = premio.toLocaleString() + ' Gs';
-  const multi = apuestaBase > 0 ? Math.round(premio / apuestaBase) : 1;
-  document.getElementById('multiDisplay').textContent  = 'x' + (multi || 1);
+  if (!currentUser||currentUser.rol!=='usuario') return;
+  document.getElementById('saldoDisplay').textContent  = currentUser.saldo.toLocaleString()+' Gs';
+  document.getElementById('premioDisplay').textContent = premio.toLocaleString()+' Gs';
+  const m = apuestaBase>0 ? Math.round(premio/apuestaBase) : 1;
+  document.getElementById('multiDisplay').textContent  = 'x'+(m||1);
   document.getElementById('btnApostar').textContent    = `Apostar ${apuestaBase.toLocaleString()} Gs`;
 }
-
 function leerApuesta() {
-  const i = document.getElementById('inputApuesta');
-  let v = parseInt(i.value, 10);
-  if (isNaN(v) || v < MIN_APUESTA) v = MIN_APUESTA;
-  v = Math.floor(v / 5000) * 5000;
-  i.value = v;
-  return v;
+  const i=document.getElementById('inputApuesta'); let v=parseInt(i.value,10);
+  if(isNaN(v)||v<MIN_APUESTA) v=MIN_APUESTA;
+  v=Math.floor(v/5000)*5000; i.value=v; return v;
 }
-
-function setDirBtns(enabled) {
-  ['btnIzq','btnCen','btnDer'].forEach(id => { document.getElementById(id).disabled = !enabled; });
+function setDirBtns(en) { ['btnIzq','btnCen','btnDer'].forEach(id=>document.getElementById(id).disabled=!en); }
+function moverArquero(dir,anim=true) {
+  const el=document.getElementById('arquero');
+  if(!anim){el.style.transition='none';setTimeout(()=>{el.style.transition='left .35s cubic-bezier(.4,0,.2,1)';},50);}
+  el.style.left=POS_ARQ[dir]||POS_ARQ.centro;
 }
-
-function moverArquero(dir, anim = true) {
-  const el = document.getElementById('arquero');
-  if (!anim) { el.style.transition = 'none'; setTimeout(() => { el.style.transition = 'left .35s cubic-bezier(.4,0,.2,1)'; }, 50); }
-  el.style.left = POS_ARQUERO[dir] || POS_ARQUERO.centro;
+function moverBalon(dir,anim=true) {
+  const el=document.getElementById('balon');
+  if(!anim){el.style.transition='none';setTimeout(()=>{el.style.transition='all .4s cubic-bezier(.4,0,.2,1)';},50);}
+  el.style.left=POS_BAL[dir]||POS_BAL.centro;
+  el.style.top=anim?'-60px':'0px';
 }
-
-function moverBalon(dir, anim = true) {
-  const el = document.getElementById('balon');
-  if (!anim) { el.style.transition = 'none'; setTimeout(() => { el.style.transition = 'all .4s cubic-bezier(.4,0,.2,1)'; }, 50); }
-  el.style.left = POS_BALON[dir] || POS_BALON.centro;
-  el.style.top  = anim ? '-60px' : '0px';
-}
-
 function mostrarMensajeCampo(tipo) {
-  const el = document.getElementById('fieldMsg');
-  el.textContent = tipo === 'gol' ? '⚽ GOOOL!' : '🧤 ¡Atajado!';
-  el.className = 'field-msg show ' + (tipo === 'gol' ? 'gol' : 'ataj');
-  setTimeout(() => { el.className = 'field-msg'; }, 1400);
+  const el=document.getElementById('fieldMsg');
+  el.textContent=tipo==='gol'?'⚽ GOOOL!':'🧤 ¡Atajado!';
+  el.className='field-msg show '+(tipo==='gol'?'gol':'ataj');
+  setTimeout(()=>{el.className='field-msg';},1400);
 }
-
 function agregarHistorial(tipo) {
-  historial.push(tipo);
-  const cont = document.getElementById('historial');
-  const tick = document.createElement('div');
-  tick.className = 'tick';
-  tick.textContent = tipo === 'gol' ? '⚽' : '🧤';
-  cont.appendChild(tick);
+  historialArr.push(tipo);
+  const c=document.getElementById('historial'),t=document.createElement('div');
+  t.className='tick'; t.textContent=tipo==='gol'?'⚽':'🧤';
+  c.appendChild(t);
 }
-
 function apostar() {
-  if (animando) return;
-  apuestaBase = leerApuesta();
-  if (currentUser.saldo < apuestaBase) { document.getElementById('resultado').textContent = '❌ Saldo insuficiente.'; return; }
-  if (jugando) { document.getElementById('resultado').textContent = 'Ya hay una apuesta activa. Tirá el balón.'; return; }
-  currentUser.saldo -= apuestaBase;
-  guardarUsuarios();
-  premio = apuestaBase;
-  jugando = true;
-  document.getElementById('btnApostar').disabled = true;
-  document.getElementById('btnRetirar').disabled = false;
+  if(animando) return;
+  apuestaBase=leerApuesta();
+  if(currentUser.saldo<apuestaBase){document.getElementById('resultado').textContent='❌ Saldo insuficiente.';return;}
+  if(jugando){document.getElementById('resultado').textContent='Ya hay apuesta activa. Tirá el balón.';return;}
+  currentUser.saldo-=apuestaBase; guardarUsuarios();
+  premio=apuestaBase; jugando=true;
+  document.getElementById('btnApostar').disabled=true;
+  document.getElementById('btnRetirar').disabled=false;
   setDirBtns(true);
-  moverArquero('centro', false);
-  moverBalon('centro', false);
+  moverArquero('centro',false); moverBalon('centro',false);
   actualizar();
-  document.getElementById('resultado').textContent = '⚽ Apuesta activa — elegí la dirección';
+  document.getElementById('resultado').textContent='⚽ Apuesta activa — elegí la dirección';
 }
-
 function tirar(dir) {
-  if (!jugando || animando) return;
-  animando = true;
-  setDirBtns(false);
-  const opciones   = ['izq', 'centro', 'der'];
-  const adivina    = Math.random() < 0.40;
-  const arqueroDir = adivina ? dir : opciones[Math.floor(Math.random() * 3)];
-  moverBalon(dir, true);
-  setTimeout(() => moverArquero(arqueroDir, true), 100);
-  setTimeout(() => {
-    const atajado = (dir === arqueroDir);
-    if (atajado) {
-      mostrarMensajeCampo('ataj');
-      agregarHistorial('ataj');
-      document.getElementById('resultado').textContent = '🧤 ¡El arquero atajó! Perdiste todo.';
-      premio = 0;
-      jugando = false;
-      document.getElementById('btnRetirar').disabled = true;
-      document.getElementById('btnApostar').disabled = false;
+  if(!jugando||animando) return;
+  animando=true; setDirBtns(false);
+  const ops=['izq','centro','der'];
+  const adivina=Math.random()<0.40;
+  const arqDir=adivina?dir:ops[Math.floor(Math.random()*3)];
+  moverBalon(dir,true);
+  setTimeout(()=>moverArquero(arqDir,true),100);
+  setTimeout(()=>{
+    const at=(dir===arqDir);
+    if(at){
+      mostrarMensajeCampo('ataj'); agregarHistorial('ataj');
+      document.getElementById('resultado').textContent='🧤 ¡El arquero atajó! Perdiste todo.';
+      premio=0; jugando=false;
+      document.getElementById('btnRetirar').disabled=true;
+      document.getElementById('btnApostar').disabled=false;
     } else {
-      premio *= 2;
-      mostrarMensajeCampo('gol');
-      agregarHistorial('gol');
-      document.getElementById('resultado').textContent = `⚽ ¡GOOOL! Premio acumulado: ${premio.toLocaleString()} Gs`;
+      premio*=2; mostrarMensajeCampo('gol'); agregarHistorial('gol');
+      document.getElementById('resultado').textContent=`⚽ ¡GOOOL! Premio: ${premio.toLocaleString()} Gs`;
       setDirBtns(true);
     }
-    actualizar();
-    animando = false;
-    setTimeout(() => moverBalon('centro', false), 600);
-  }, 500);
+    actualizar(); animando=false;
+    setTimeout(()=>moverBalon('centro',false),600);
+  },500);
 }
-
 function retirar() {
-  if (!jugando || premio <= 0 || animando) return;
-  currentUser.saldo += premio;
-  guardarUsuarios();
-  const ganado = premio;
-  premio = 0; jugando = false;
+  if(!jugando||premio<=0||animando) return;
+  currentUser.saldo+=premio; guardarUsuarios();
+  const g=premio; premio=0; jugando=false;
   setDirBtns(false);
-  document.getElementById('btnRetirar').disabled = true;
-  document.getElementById('btnApostar').disabled = false;
-  document.getElementById('resultado').textContent = `💰 ¡Retiraste ${ganado.toLocaleString()} Gs!`;
+  document.getElementById('btnRetirar').disabled=true;
+  document.getElementById('btnApostar').disabled=false;
+  document.getElementById('resultado').textContent=`💰 ¡Retiraste ${g.toLocaleString()} Gs!`;
   actualizar();
-  setTimeout(() => { moverArquero('centro', false); moverBalon('centro', false); }, 300);
+  setTimeout(()=>{moverArquero('centro',false);moverBalon('centro',false);},300);
+}
+document.getElementById('inputApuesta').addEventListener('change',()=>{ apuestaBase=leerApuesta(); if(!jugando) actualizar(); });
+
+// ── RULETA ────────────────────────────────────────────────
+const ROUL_NUMBERS = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+const ROUL_COLORS = {
+  0:'#15803d',
+  32:'#b91c1c',15:'#b91c1c',19:'#b91c1c',4:'#b91c1c',21:'#b91c1c',2:'#b91c1c',25:'#b91c1c',
+  17:'#b91c1c',34:'#b91c1c',6:'#b91c1c',27:'#b91c1c',13:'#b91c1c',36:'#b91c1c',11:'#b91c1c',
+  30:'#b91c1c',8:'#b91c1c',23:'#b91c1c',10:'#b91c1c',
+  5:'#111',24:'#111',16:'#111',33:'#111',1:'#111',20:'#111',14:'#111',31:'#111',9:'#111',
+  22:'#111',18:'#111',29:'#111',7:'#111',28:'#111',12:'#111',35:'#111',3:'#111',26:'#111'
+};
+let roulBet = null, roulSpinning = false, roulAngle = 0;
+
+function drawRoulette(highlightIdx=null) {
+  const canvas = document.getElementById('rouletteCanvas');
+  const ctx = canvas.getContext('2d');
+  const cx=150,cy=150,r=148,slice=Math.PI*2/ROUL_NUMBERS.length;
+  ctx.clearRect(0,0,300,300);
+  ROUL_NUMBERS.forEach((num,i) => {
+    const start = roulAngle + i*slice - Math.PI/2;
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,start+slice); ctx.closePath();
+    ctx.fillStyle = (highlightIdx===i) ? '#fbbf24' : ROUL_COLORS[num];
+    ctx.fill();
+    ctx.strokeStyle='#222'; ctx.lineWidth=1; ctx.stroke();
+    ctx.save(); ctx.translate(cx,cy);
+    ctx.rotate(start+slice/2);
+    ctx.textAlign='right'; ctx.fillStyle='#fff';
+    ctx.font='bold 10px Space Mono,monospace';
+    ctx.fillText(num, r-8, 4);
+    ctx.restore();
+  });
+  // center circle
+  ctx.beginPath(); ctx.arc(cx,cy,24,0,Math.PI*2);
+  ctx.fillStyle='#111'; ctx.fill();
+  ctx.strokeStyle='#333'; ctx.lineWidth=3; ctx.stroke();
+  ctx.fillStyle='#22c55e'; ctx.font='bold 12px Syne,sans-serif';
+  ctx.textAlign='center'; ctx.fillText('BC',cx,cy+5);
+}
+function selectRoulBet(tipo) {
+  if(roulSpinning) return;
+  roulBet=tipo;
+  document.querySelectorAll('.roul-bet-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('rb-'+tipo).classList.add('selected');
+  document.getElementById('btnGirar').disabled=false;
+}
+function enableRoulBtns(en) {
+  document.querySelectorAll('.roul-bet-btn').forEach(b=>b.disabled=!en);
+  document.getElementById('btnGirar').disabled=!en||!roulBet;
+}
+function girarRuleta() {
+  if(roulSpinning||!roulBet) return;
+  const apuesta=parseInt(document.getElementById('inputRuleta').value,10)||20000;
+  if(currentUser.saldo<apuesta){ document.getElementById('rouletteResult').textContent='❌ Saldo insuficiente.'; return; }
+  currentUser.saldo-=apuesta; guardarUsuarios(); actualizar();
+  roulSpinning=true; enableRoulBtns(false);
+  document.getElementById('rouletteResult').textContent='🎡 Girando...';
+  document.getElementById('roulNumberDisplay').textContent='...';
+  // pick result
+  const resultIdx=Math.floor(Math.random()*ROUL_NUMBERS.length);
+  const resultNum=ROUL_NUMBERS[resultIdx];
+  // spin
+  const totalSlices=ROUL_NUMBERS.length;
+  const slice=Math.PI*2/totalSlices;
+  const target = (Math.PI*2*8) + (totalSlices-resultIdx)*slice; // 8 full spins + land
+  const duration=4000; const start=performance.now(); const startAngle=roulAngle;
+  function animate(now) {
+    const elapsed=now-start, prog=Math.min(elapsed/duration,1);
+    const ease=1-Math.pow(1-prog,4);
+    roulAngle=startAngle+target*ease;
+    drawRoulette();
+    if(prog<1){ requestAnimationFrame(animate); return; }
+    roulAngle=startAngle+target;
+    drawRoulette(resultIdx);
+    // result
+    const color=ROUL_COLORS[resultNum];
+    const colorName=resultNum===0?'Verde':color==='#b91c1c'?'Rojo':'Negro';
+    document.getElementById('roulNumberDisplay').textContent=resultNum;
+    document.getElementById('roulNumberDisplay').style.color=resultNum===0?'#22c55e':color==='#b91c1c'?'#f87171':'#ccc';
+    let gano=false, mult=0;
+    if(roulBet==='rojo'&&color==='#b91c1c'){gano=true;mult=2;}
+    else if(roulBet==='negro'&&color==='#111'){gano=true;mult=2;}
+    else if(roulBet==='verde'&&resultNum===0){gano=true;mult=14;}
+    else if(roulBet==='impar'&&resultNum!==0&&resultNum%2!==0){gano=true;mult=2;}
+    else if(roulBet==='par'&&resultNum!==0&&resultNum%2===0){gano=true;mult=2;}
+    else if(roulBet==='bajo'&&resultNum>=1&&resultNum<=18){gano=true;mult=2;}
+    if(gano){
+      const ganancia=apuesta*mult;
+      currentUser.saldo+=ganancia; guardarUsuarios();
+      document.getElementById('rouletteResult').textContent=`🎉 ¡${colorName} ${resultNum}! Ganaste ${ganancia.toLocaleString()} Gs`;
+    } else {
+      document.getElementById('rouletteResult').textContent=`❌ ${colorName} ${resultNum}. Perdiste ${apuesta.toLocaleString()} Gs.`;
+    }
+    actualizar();
+    roulSpinning=false; roulBet=null;
+    document.querySelectorAll('.roul-bet-btn').forEach(b=>b.classList.remove('selected'));
+    enableRoulBtns(true);
+    document.getElementById('btnGirar').disabled=true;
+  }
+  requestAnimationFrame(animate);
 }
 
-// ── INPUT APUESTA ────────────────────────────────────────
-document.getElementById('inputApuesta').addEventListener('change', () => {
-  apuestaBase = leerApuesta();
-  if (!jugando) actualizar();
-});
-
-// ── ENTER PARA LOGIN ──────────────────────────────────────
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  if (document.getElementById('login').style.display === 'none') return;
-  const activeForm = document.querySelector('.login-form.active');
-  if (activeForm && activeForm.id === 'loginForm') login();
-  else registrarse();
-});
-
-// ── CONEXIÓN FIREBASE ─────────────────────────────────────
-db.ref('.info/connected').on('value', snap => {
-  if (snap.val() === true) {
-    firebaseOk = true;
-    // Si el usuario está activo, sincronizar saldo actualizado
-    if (currentUser) {
-      db.ref('usuarios').once('value').then(s => {
-        const data = s.val();
-        if (data) {
-          const actualizado = Object.values(data).find(x => x.usuario === currentUser.usuario);
-          if (actualizado) {
-            currentUser.saldo = actualizado.saldo;
-            usuarios = Object.values(data);
-            if (currentUser.rol === 'usuario') actualizar();
-            if (currentUser.rol === 'admin') renderAdmin();
-          }
+// ── FIREBASE SYNC ─────────────────────────────────────────
+db.ref('.info/connected').on('value',snap=>{
+  if(snap.val()===true){
+    firebaseOk=true;
+    if(currentUser){
+      db.ref('usuarios').once('value').then(s=>{
+        const d=s.val();
+        if(d){
+          const act=Object.values(d).find(x=>x.usuario===currentUser.usuario);
+          if(act){ currentUser.saldo=act.saldo; usuarios=Object.values(d); }
+          if(currentUser.rol==='usuario') actualizar();
+          if(currentUser.rol==='admin') renderAdmin();
         }
       });
     }
-  } else {
-    firebaseOk = false;
-  }
+  } else { firebaseOk=false; }
 });
 
-// ── INICIO ────────────────────────────────────────────────
-// Carga usuarios y luego intenta restaurar la sesión automáticamente
-cargarUsuarios(() => {
-  restaurarSesion();
+// ── ENTER PARA LOGIN ──────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  if(document.getElementById('login').style.display==='none') return;
+  const af=document.querySelector('.login-form.active');
+  if(af&&af.id==='loginForm') login(); else registrarse();
 });
 </script>
 </body>
