@@ -852,7 +852,9 @@ function apostar(){
 }
 function tirar(dir){
   if(!jugando||animando)return;animando=true;setDirBtns(false);
-  const ops=['izq','centro','der'],ad=Math.random()<0.40?dir:ops[Math.floor(Math.random()*3)];
+  const ops=['izq','centro','der'];
+  const saveChance=0.42+Math.min(0.18,Math.max(0,premio/apBase-1)*0.06);
+  const ad=Math.random()<saveChance?dir:ops[Math.floor(Math.random()*3)];
   mBal(dir,true);setTimeout(()=>mArq(ad,true),100);
   setTimeout(()=>{
     if(dir===ad){mostrarMsg('ataj');agregarH('ataj');document.getElementById('resultado').textContent='🧤 ¡Atajado! Perdiste todo.';premio=0;jugando=false;document.getElementById('btnRetirar').disabled=true;document.getElementById('btnApostar').disabled=false;}
@@ -871,6 +873,16 @@ document.getElementById('inputApuesta').addEventListener('change',()=>{apBase=le
 
 // ── TRAGAMONEDAS ──────────────────────────────────────────
 const SS=['🍇','🍊','🍋','🍒','⭐','7️⃣','💎'];
+function weightedSlotSym(){
+  const r=Math.random();
+  if(r<0.30)return'🍇';
+  if(r<0.54)return'🍊';
+  if(r<0.72)return'🍋';
+  if(r<0.86)return'🍒';
+  if(r<0.94)return'⭐';
+  if(r<0.98)return'7️⃣';
+  return'💎';
+}
 const SW={'💎💎💎':50,'7️⃣7️⃣7️⃣':20,'🍒🍒🍒':10,'⭐⭐⭐':8,'🍋🍋🍋':5,'🍊🍊🍊':4,'🍇🍇🍇':3};
 let slotSpin=false;
 function initReels(){
@@ -889,7 +901,13 @@ function spinSlots(){
   slotSpin=true;document.getElementById('btnSpin').disabled=true;
   document.getElementById('slotsResult').textContent='🎰 Girando...';document.getElementById('slotsWin').textContent='';
   [0,1,2].forEach(i=>document.getElementById('reel'+i).classList.remove('reel-winner'));
-  const res=[SS[Math.floor(Math.random()*SS.length)],SS[Math.floor(Math.random()*SS.length)],SS[Math.floor(Math.random()*SS.length)]];
+  let res=[weightedSlotSym(),weightedSlotSym(),weightedSlotSym()];
+  if((SW[res.join('')]||0)>0 && Math.random()<0.38){
+    const loseIdx=Math.floor(Math.random()*3);
+    let alt=weightedSlotSym();
+    while(alt===res[loseIdx])alt=weightedSlotSym();
+    res[loseIdx]=alt;
+  }
   let done=0;
   [0,1,2].forEach((r,idx)=>{
     const inn=document.getElementById('ri'+r);inn.innerHTML='';
@@ -923,12 +941,23 @@ function spinSlots(){
 // ── RULETA 777 ────────────────────────────────────────────
 const D7=['7','BAR','🔔','💎','🍒','⭐','🍋','🍊'];
 const D7L={'7':'SIETE','BAR':'BAR','🔔':'BELL','💎':'GEM','🍒':'CHERRY','⭐':'STAR','🍋':'LEMON','🍊':'ORANGE'};
+function d7Random(){
+  const r=Math.random();
+  if(r<0.10)return'7';
+  if(r<0.22)return'BAR';
+  if(r<0.40)return'🔔';
+  if(r<0.56)return'💎';
+  if(r<0.70)return'🍒';
+  if(r<0.82)return'⭐';
+  if(r<0.92)return'🍋';
+  return'🍊';
+}
 let w7Spin=false;
 function initDrums(){
   for(let d=0;d<3;d++){
     const inn=document.getElementById('di'+d);inn.innerHTML='';
     for(let j=0;j<8;j++){
-      const s=D7[Math.floor(Math.random()*D7.length)];
+      const s=d7Random();
       const isText=(s==='7'||s==='BAR');
       const e=document.createElement('div');
       e.className='drum-symbol'+(isText?' is-text':'');
@@ -946,11 +975,11 @@ function spinW7(){
   w7Spin=true;document.getElementById('btnW7').disabled=true;
   document.getElementById('w7Result').textContent='🎰 Girando...';document.getElementById('w7Win').textContent='';
   [0,1,2].forEach(i=>document.getElementById('drum'+i).classList.remove('drum-winner'));
-  const res=[D7[Math.floor(Math.random()*D7.length)],D7[Math.floor(Math.random()*D7.length)],D7[Math.floor(Math.random()*D7.length)]];
+  const res=[d7Random(),d7Random(),d7Random()];
   let done=0;
   [0,1,2].forEach((d,idx)=>{
     const inn=document.getElementById('di'+d);inn.innerHTML='';
-    const strip=[];for(let j=0;j<18;j++)strip.push(D7[Math.floor(Math.random()*D7.length)]);strip.push(res[d]);
+    const strip=[];for(let j=0;j<18;j++)strip.push(d7Random());strip.push(res[d]);
     strip.forEach(s=>{
       const isText=(s==='7'||s==='BAR');
       const e=document.createElement('div');
@@ -1002,9 +1031,9 @@ function calcMult(revealed,bombs){
   for(let i=0;i<revealed;i++){
     const remaining=TOTAL_CARDS-i;
     const safePick=safe-i;
-    m*=(remaining/safePick)*1.02; // pequeño bono de casa al revés
+    m*=(remaining/safePick)*1.01; // ligero sesgo a favor de la casa
   }
-  return Math.max(1,Math.round(m*100)/100);
+  return Math.max(1,Math.round(m*100)/100*0.95);
 }
 
 function configurarMinas(){
@@ -1188,10 +1217,10 @@ db.ref('.info/connected').on('value',snap=>{
 const GS_SYMS=['🍀','🪙','💰','🐎','🏠'];
 function gsRandom(){
   const r=Math.random();
-  if(r<0.40)return'🍀';
-  if(r<0.68)return'🪙';
-  if(r<0.88)return'💰';
-  if(r<0.97)return'🐎';
+  if(r<0.30)return'🍀';
+  if(r<0.55)return'🪙';
+  if(r<0.78)return'💰';
+  if(r<0.92)return'🐎';
   return'🏠';
 }
 let goldSpin=false;
@@ -1293,6 +1322,7 @@ function spinGold(){
     }
 
     if(totalWin>0){
+      totalWin=Math.floor(totalWin*0.94);
       cu.saldo+=totalWin;guardarU();
       document.getElementById('goldWin').textContent=`+${totalWin.toLocaleString()} Gs`;
       document.getElementById('goldResult').textContent=resultMsg||`💰 Ganaste ${totalWin.toLocaleString()} Gs`;
