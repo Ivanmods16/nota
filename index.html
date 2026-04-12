@@ -126,7 +126,8 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
 .drums-wrap{display:flex;gap:6px;justify-content:center;margin-bottom:14px;align-items:center;}
 .drum{width:96px;height:110px;background:#050d1a;border:2px solid #1d4ed8;border-radius:14px;overflow:hidden;position:relative;box-shadow:inset 0 4px 20px rgba(0,0,0,.6);}
 .drum-inner{position:absolute;width:100%;top:0;left:0;}
-.drum-symbol{height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:36px;font-weight:800;font-family:'Space Mono',monospace;color:var(--gold);}
+.drum-symbol{height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:36px;font-weight:800;font-family:'Space Mono',monospace;color:#fff;}
+.drum-symbol.is-text{color:var(--gold);}
 .drum-symbol .sym-label{font-size:9px;color:#93c5fd;margin-top:2px;letter-spacing:1px;}
 .drum::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,13,26,.88) 0%,transparent 24%,transparent 76%,rgba(5,13,26,.88) 100%);pointer-events:none;z-index:2;}
 .drum-winner{border-color:var(--gold)!important;box-shadow:0 0 24px rgba(251,191,36,.5)!important;}
@@ -141,6 +142,33 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
 .btn-w7:hover:not(:disabled){background:linear-gradient(135deg,#1e40af,#1e3a8a);}
 .btn-w7:disabled{background:#1a1a1a;color:#444;cursor:not-allowed;}
 #w7Result{font-size:13px;color:var(--muted2);min-height:18px;font-family:'Space Mono',monospace;text-align:center;}
+
+/* GOLD SLOT */
+.gold-machine{background:radial-gradient(ellipse at 50% 0%,#1a0e00,#0a0800);border:2px solid #b45309;border-radius:20px;padding:24px;margin-bottom:14px;position:relative;overflow:hidden;}
+.gold-lights{display:flex;justify-content:space-around;margin-bottom:10px;}
+.gold-light{width:10px;height:10px;border-radius:50%;animation:blink 0.8s ease-in-out infinite alternate;}
+.gold-light:nth-child(1){background:#fbbf24;box-shadow:0 0 8px #fbbf24;}
+.gold-light:nth-child(2){background:#ef4444;box-shadow:0 0 8px #ef4444;animation-delay:.15s;}
+.gold-light:nth-child(3){background:#22c55e;box-shadow:0 0 8px #22c55e;animation-delay:.3s;}
+.gold-light:nth-child(4){background:#60a5fa;box-shadow:0 0 8px #60a5fa;animation-delay:.45s;}
+.gold-light:nth-child(5){background:#fbbf24;box-shadow:0 0 8px #fbbf24;animation-delay:.6s;}
+.gold-light:nth-child(6){background:#ef4444;box-shadow:0 0 8px #ef4444;animation-delay:.75s;}
+.gold-light:nth-child(7){background:#22c55e;box-shadow:0 0 8px #22c55e;animation-delay:.9s;}
+.gold-title{font-size:16px;font-weight:800;text-align:center;color:#fbbf24;letter-spacing:2px;margin-bottom:14px;text-transform:uppercase;}
+.gold-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px;}
+.gold-cell{background:#0d0a00;border:2px solid #78350f;border-radius:10px;height:70px;display:flex;align-items:center;justify-content:center;font-size:34px;transition:border-color .2s;}
+.gold-cell.spin-anim{animation:goldSpin 0.1s linear infinite;}
+.gold-cell.win-cell{border-color:#fbbf24;box-shadow:0 0 14px #fbbf24;animation:goldGlow .5s infinite alternate;}
+@keyframes goldSpin{0%{transform:translateY(-3px)}50%{transform:translateY(3px)}100%{transform:translateY(-3px)}}
+@keyframes goldGlow{from{box-shadow:0 0 8px #fbbf24}to{box-shadow:0 0 22px #fde68a}}
+.gold-win{text-align:center;font-size:18px;font-weight:800;min-height:26px;margin-bottom:8px;font-family:'Space Mono',monospace;color:#fbbf24;}
+.gold-paytable{background:rgba(0,0,0,.5);border:1px solid #78350f;border-radius:10px;padding:10px;margin-bottom:4px;}
+.btn-gold{width:100%;padding:14px;background:linear-gradient(135deg,#b45309,#78350f);color:#fde68a;font-weight:800;font-size:15px;border:none;border-radius:12px;cursor:pointer;font-family:'Syne',sans-serif;margin-bottom:10px;transition:all .2s;}
+.btn-gold:hover:not(:disabled){background:linear-gradient(135deg,#d97706,#92400e);}
+.btn-gold:disabled{background:#1a1a1a;color:#444;cursor:not-allowed;}
+#goldResult{font-size:13px;color:var(--muted2);min-height:18px;font-family:'Space Mono',monospace;text-align:center;}
+/* 5 tabs: reducir font-size */
+.game-tabs .game-tab{font-size:9px;}
 
 /* BUSCAMINAS CARTAS */
 .minas-machine{background:linear-gradient(135deg,#1a0808,#200d0d);border:2px solid #7f1d1d;border-radius:20px;padding:24px;margin-bottom:14px;}
@@ -294,7 +322,7 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
     <h2>💳 Cargar Créditos</h2>
     <p>Bienvenido a <strong>Blackcasino</strong>, somos de San Roque González de Santa Cruz.</p>
     <div class="metodo"><div class="titulo">📱 WhatsApp</div><div class="detalle">+595 992 809980 — Contanos el monto y te guiamos.</div></div>
-    <div class="metodo"><div class="titulo">📧 Correo</div><div class="detalle">evergitasanchez@gmail.com</div></div>
+    <div class="metodo"><div class="titulo">📧 Correo</div><div class="detalle"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="debba8bbacb9b7aabfadbfb0bdb6bba49eb9b3bfb7b2f0bdb1b3">[email&#160;protected]</a></div></div>
     <div class="metodo"><div class="titulo">🧾 Comprobante</div><div class="detalle">Transferí y subí tu comprobante. Te acreditamos al instante.</div></div>
     <p style="margin-top:16px;color:var(--green);text-align:center;font-weight:700;">By Iván — ¡Gracias por preferir Blackcasino!</p>
     <button class="btn-close" onclick="cerrarCreditos()">Cerrar</button>
@@ -319,6 +347,7 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
     <button class="game-tab" onclick="switchGame(1)">🎰<br>Slots</button>
     <button class="game-tab" onclick="switchGame(2)">7️⃣<br>777</button>
     <button class="game-tab" onclick="switchGame(3)">🃏<br>Cartas</button>
+    <button class="game-tab" onclick="switchGame(4)">🍀<br>Gold</button>
   </div>
 
   <!-- PENALES -->
@@ -440,6 +469,34 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
     <button class="btn-nueva-minas" id="btnMinasNueva" onclick="nuevaPartidaMinas()" style="display:none">🔄 Nueva partida</button>
     <p id="minasResult"></p>
   </div>
+
+  <!-- GOLD SLOT ULTIMATE -->
+  <div id="gp4" class="game-panel">
+    <div class="gold-machine">
+      <div class="gold-lights">
+        <div class="gold-light"></div><div class="gold-light"></div><div class="gold-light"></div>
+        <div class="gold-light"></div><div class="gold-light"></div><div class="gold-light"></div><div class="gold-light"></div>
+      </div>
+      <div class="gold-title">🍀 GOLD SLOT ULTIMATE 🍀</div>
+      <div class="gold-grid" id="goldGrid"></div>
+      <div class="gold-win" id="goldWin"></div>
+      <div class="gold-paytable">
+        <div class="paytable-title" style="color:#fbbf24">Premios</div>
+        <div class="paytable-row"><span class="pt-syms">🍀 ×12+</span><span class="pt-mult" style="color:#22c55e">x5 mult</span></div>
+        <div class="paytable-row"><span class="pt-syms">🍀 ×8–11</span><span class="pt-mult">x2 mult</span></div>
+        <div class="paytable-row"><span class="pt-syms">🍀 ×5–7</span><span class="pt-mult">x1 mult</span></div>
+        <div class="paytable-row"><span class="pt-syms">🏠🏠🏠 fila</span><span class="pt-mult" style="color:#fbbf24">x20 BONUS</span></div>
+        <div class="paytable-row"><span class="pt-syms">💰💰💰 fila</span><span class="pt-mult" style="color:#fbbf24">x10 BONUS</span></div>
+        <div class="paytable-row"><span class="pt-syms">🐎🐎🐎 fila</span><span class="pt-mult" style="color:#fbbf24">x8 BONUS</span></div>
+      </div>
+    </div>
+    <div class="bet-row">
+      <label>Apuesta:</label>
+      <input id="inputGold" type="number" min="5000" step="5000" value="20000">
+    </div>
+    <button class="btn-gold" id="btnGold" onclick="spinGold()">🍀 GIRAR</button>
+    <p id="goldResult"></p>
+  </div>
 </div>
 
 <!-- ADMIN -->
@@ -490,7 +547,7 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
   </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script>
 // ── FIREBASE ──────────────────────────────────────────────
@@ -636,7 +693,7 @@ function showCasino(){
   document.getElementById('casino').style.display='block';
   // FIX: usar cu.usuario directamente (cu ya es la referencia al objeto)
   document.getElementById('userLabel').textContent='👤 '+cu.usuario;
-  resetJuego();initReels();initDrums();configurarMinas();
+  resetJuego();initReels();initDrums();configurarMinas();initGoldGrid();
 }
 
 function showAdmin(){
@@ -648,7 +705,7 @@ function abrirCreditos(){document.getElementById('creditosModal').classList.add(
 function cerrarCreditos(){document.getElementById('creditosModal').classList.remove('show');}
 
 // GAME TABS
-const GAMES=['gp0','gp1','gp2','gp3'];
+const GAMES=['gp0','gp1','gp2','gp3','gp4'];
 function switchGame(idx){
   document.querySelectorAll('.game-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
   GAMES.forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===idx));
@@ -870,7 +927,14 @@ let w7Spin=false;
 function initDrums(){
   for(let d=0;d<3;d++){
     const inn=document.getElementById('di'+d);inn.innerHTML='';
-    for(let j=0;j<8;j++){const s=D7[Math.floor(Math.random()*D7.length)];const e=document.createElement('div');e.className='drum-symbol';e.innerHTML=`${s}<span class="sym-label">${D7L[s]||s}</span>`;inn.appendChild(e);}
+    for(let j=0;j<8;j++){
+      const s=D7[Math.floor(Math.random()*D7.length)];
+      const isText=(s==='7'||s==='BAR');
+      const e=document.createElement('div');
+      e.className='drum-symbol'+(isText?' is-text':'');
+      e.innerHTML=`${s}<span class="sym-label">${D7L[s]||s}</span>`;
+      inn.appendChild(e);
+    }
     inn.style.top='0px';
   }
 }
@@ -887,7 +951,13 @@ function spinW7(){
   [0,1,2].forEach((d,idx)=>{
     const inn=document.getElementById('di'+d);inn.innerHTML='';
     const strip=[];for(let j=0;j<18;j++)strip.push(D7[Math.floor(Math.random()*D7.length)]);strip.push(res[d]);
-    strip.forEach(s=>{const e=document.createElement('div');e.className='drum-symbol';e.innerHTML=`${s}<span class="sym-label">${D7L[s]||s}</span>`;inn.appendChild(e);});
+    strip.forEach(s=>{
+      const isText=(s==='7'||s==='BAR');
+      const e=document.createElement('div');
+      e.className='drum-symbol'+(isText?' is-text':'');
+      e.innerHTML=`${s}<span class="sym-label">${D7L[s]||s}</span>`;
+      inn.appendChild(e);
+    });
     inn.style.transition='none';inn.style.top='0px';
     const symH=110,target=-((strip.length-1)*symH);
     setTimeout(()=>{inn.style.transition=`top ${1.3+idx*0.5}s cubic-bezier(.1,.6,.22,1)`;inn.style.top=target+'px';},40+idx*80);
@@ -1114,11 +1184,134 @@ db.ref('.info/connected').on('value',snap=>{
   }else fbOk=false;
 });
 
+// ── GOLD SLOT ULTIMATE ────────────────────────────────────
+const GS_SYMS=['🍀','🪙','💰','🐎','🏠'];
+function gsRandom(){
+  const r=Math.random();
+  if(r<0.40)return'🍀';
+  if(r<0.68)return'🪙';
+  if(r<0.88)return'💰';
+  if(r<0.97)return'🐎';
+  return'🏠';
+}
+let goldSpin=false;
+
+function initGoldGrid(){
+  const grid=document.getElementById('goldGrid');
+  grid.innerHTML='';
+  for(let i=0;i<15;i++){
+    const d=document.createElement('div');
+    d.className='gold-cell';
+    d.id='gc_'+i;
+    d.textContent='❓';
+    grid.appendChild(d);
+  }
+}
+
+function dropCoinsGold(){
+  for(let i=0;i<18;i++){
+    const coin=document.createElement('div');
+    coin.style.cssText=`position:fixed;top:-40px;font-size:26px;z-index:9999;animation:fall 2s linear forwards;left:${Math.random()*100}vw`;
+    coin.textContent='🪙';
+    document.body.appendChild(coin);
+    setTimeout(()=>coin.remove(),2200);
+  }
+  // Inyectar keyframe fall si no existe
+  if(!document.getElementById('fallStyle')){
+    const st=document.createElement('style');
+    st.id='fallStyle';
+    st.textContent='@keyframes fall{to{transform:translateY(100vh);opacity:0}}';
+    document.head.appendChild(st);
+  }
+}
+
+function spinGold(){
+  if(goldSpin)return;
+  const ap=leerAp2('inputGold');
+  if((cu.saldo||0)<ap){document.getElementById('goldResult').textContent='❌ Saldo insuficiente.';return;}
+  cu.saldo-=ap;guardarU();actualizar();
+  goldSpin=true;
+  document.getElementById('btnGold').disabled=true;
+  document.getElementById('goldResult').textContent='🍀 Girando...';
+  document.getElementById('goldWin').textContent='';
+  const cells=document.querySelectorAll('.gold-cell');
+  cells.forEach(c=>{c.classList.add('spin-anim');c.classList.remove('win-cell');});
+
+  // Animación de símbolos aleatorios
+  const iv=setInterval(()=>{
+    cells.forEach(c=>{c.textContent=GS_SYMS[Math.floor(Math.random()*GS_SYMS.length)];});
+  },80);
+
+  setTimeout(()=>{
+    clearInterval(iv);
+    const results=[];
+    cells.forEach(c=>{
+      const s=gsRandom();
+      c.textContent=s;
+      c.classList.remove('spin-anim');
+      results.push(s);
+    });
+
+    // Contar tréboles
+    const cloverCount=results.filter(s=>s==='🍀').length;
+
+    // Verificar filas (3 filas de 5)
+    let bonusMsg='',bonusMult=0;
+    for(let row=0;row<3;row++){
+      const rowSyms=results.slice(row*5,row*5+5);
+      const allSame=rowSyms.every(s=>s===rowSyms[0]);
+      if(allSame){
+        let rm=0;
+        if(rowSyms[0]==='🏠'){rm=20;bonusMsg='🏠 ¡JACKPOT CASAS! ';}
+        else if(rowSyms[0]==='💰'){rm=10;bonusMsg='💰 ¡FILA DE ORO! ';}
+        else if(rowSyms[0]==='🐎'){rm=8;bonusMsg='🐎 ¡FILA DE CABALLOS! ';}
+        else if(rowSyms[0]==='🪙'){rm=4;bonusMsg='🪙 ¡Fila de monedas! ';}
+        if(rm>bonusMult){bonusMult=rm;}
+        // Marcar celdas ganadoras
+        for(let col=0;col<5;col++){
+          document.getElementById('gc_'+(row*5+col)).classList.add('win-cell');
+        }
+      }
+    }
+
+    let totalWin=0;
+    let resultMsg='';
+
+    if(bonusMult>0){
+      const bw=ap*bonusMult;
+      totalWin+=bw;
+      resultMsg+=`${bonusMsg}+${bw.toLocaleString()} Gs. `;
+    }
+
+    if(cloverCount>=5){
+      const mult=cloverCount>=12?5:cloverCount>=8?2:1;
+      const cw=ap*mult*cloverCount;
+      totalWin+=cw;
+      resultMsg+=`🍀×${cloverCount} → +${cw.toLocaleString()} Gs (x${mult})`;
+      // Marcar celdas con trébol
+      cells.forEach(c=>{if(c.textContent==='🍀')c.classList.add('win-cell');});
+    }
+
+    if(totalWin>0){
+      cu.saldo+=totalWin;guardarU();
+      document.getElementById('goldWin').textContent=`+${totalWin.toLocaleString()} Gs`;
+      document.getElementById('goldResult').textContent=resultMsg||`💰 Ganaste ${totalWin.toLocaleString()} Gs`;
+      dropCoinsGold();
+      setTimeout(()=>cells.forEach(c=>c.classList.remove('win-cell')),2500);
+    } else {
+      document.getElementById('goldResult').textContent=cloverCount>0?`😢 Solo ${cloverCount} trébol${cloverCount>1?'es':''}... Necesitás 5+`:'😢 Sin suerte esta vez';
+    }
+
+    actualizar();
+    goldSpin=false;
+    document.getElementById('btnGold').disabled=false;
+  },2000);
+}
+
 document.addEventListener('keydown',e=>{
-  if(e.key!=='Enter')return;
-  if(document.getElementById('login').style.display==='none')return;
-  const af=document.querySelector('.login-form.active');
-  if(af&&af.id==='loginForm')login();else registrarse();
+  if (e.key.toLowerCase() === 'g' && document.getElementById('gp4').classList.contains('active')) {
+    spinGold();
+  }
 });
 </script>
 </body>
