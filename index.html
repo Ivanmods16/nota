@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Blackcasino ⚽</title>
+<title>Blackcasino</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -44,6 +44,11 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
 .metodo{background:#0d0d0d;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;}
 .metodo .titulo{color:var(--green);font-weight:700;margin-bottom:6px;font-size:13px;}
 .metodo .detalle{color:#888;font-size:12px;font-family:'Space Mono',monospace;}
+.profile-grid{display:grid;gap:16px;}
+.profile-block{padding:14px;border:1px solid var(--border);border-radius:12px;background:#0d0d0d;}
+.profile-block h3{font-size:13px;margin-bottom:12px;color:var(--text);}
+.profile-actions{display:flex;gap:10px;margin-top:14px;}
+.profile-actions .btn-close,.profile-actions .btn-save{flex:1;margin-top:0;}
 .btn-close{width:100%;padding:12px;background:#222;color:var(--text);border:none;border-radius:10px;font-size:14px;cursor:pointer;margin-top:16px;font-family:'Syne',sans-serif;font-weight:700;}
 .btn-close:hover{background:#2a2a2a;}
 #casino{display:none;width:100%;max-width:580px;padding:16px;text-align:center;position:relative;z-index:1;}
@@ -51,8 +56,10 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
 .header .logo{font-size:20px;font-weight:800;}
 .header-right{display:flex;align-items:center;gap:10px;}
 .user-info{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;}
-.btn-logout{background:none;border:1px solid var(--border2);color:var(--muted2);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;transition:all .2s;}
-.btn-logout:hover{border-color:#555;color:var(--text);}
+.btn-logout,.btn-profile{background:none;border:1px solid var(--border2);color:var(--muted2);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;transition:all .2s;}
+.btn-logout:hover,.btn-profile:hover{border-color:#555;color:var(--text);}
+.btn-profile{display:inline-flex;align-items:center;gap:8px;}
+.btn-profile::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px rgba(32,200,106,.65);}
 .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 10px;}
 .stat-card .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;font-family:'Space Mono',monospace;}
@@ -67,8 +74,16 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
 .field::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0,rgba(255,255,255,.03) 1px,transparent 1px,transparent 28px),repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0,rgba(255,255,255,.03) 1px,transparent 1px,transparent 28px);}
 .arco{width:160px;height:70px;border:4px solid rgba(255,255,255,.75);border-bottom:none;border-radius:8px 8px 0 0;margin:0 auto 10px;position:relative;background:rgba(255,255,255,.04);}
 .arquero-wrap{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:center;height:70px;}
-#arquero{width:40px;height:60px;background:linear-gradient(135deg,#60a5fa,#1e40af);border:2px solid #fff;border-radius:6px;position:absolute;bottom:0;transition:left .35s cubic-bezier(.4,0,.2,1);left:calc(50% - 20px);}
-#arquero::after{content:'🧤';}
+#arquero{width:52px;height:66px;position:absolute;bottom:0;left:calc(50% - 26px);transition:left .35s cubic-bezier(.4,0,.2,1);filter:drop-shadow(0 10px 10px rgba(0,0,0,.35));}
+.keeper-head{position:absolute;top:0;left:17px;width:18px;height:18px;border-radius:50%;background:#f0c39b;border:2px solid rgba(255,255,255,.85);z-index:3;}
+.keeper-body{position:absolute;top:18px;left:13px;width:26px;height:34px;border-radius:10px 10px 8px 8px;background:linear-gradient(180deg,#38bdf8,#1d4ed8);border:2px solid rgba(255,255,255,.9);z-index:2;}
+.keeper-body::after{content:'';position:absolute;left:9px;top:5px;width:5px;height:22px;border-radius:4px;background:rgba(255,255,255,.85);}
+.keeper-arm{position:absolute;top:24px;width:20px;height:8px;border-radius:999px;background:#0f64c8;border:2px solid rgba(255,255,255,.8);z-index:1;}
+.keeper-arm.left{left:0;transform:rotate(-22deg);transform-origin:right center;}
+.keeper-arm.right{right:0;transform:rotate(22deg);transform-origin:left center;}
+.keeper-leg{position:absolute;bottom:0;width:9px;height:18px;border-radius:0 0 8px 8px;background:#101827;border:1px solid rgba(255,255,255,.45);}
+.keeper-leg.left{left:16px;transform:rotate(7deg);}
+.keeper-leg.right{right:16px;transform:rotate(-7deg);}
 .balon-wrap{display:flex;justify-content:center;margin:10px 0 6px;height:56px;position:relative;}
 #balon{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#f8fafc 0%,#e2e8f0 80%);box-shadow:inset -2px -2px 0 #9ca3af,inset 3px 3px 6px rgba(0,0,0,.3);position:absolute;transition:all .4s cubic-bezier(.4,0,.2,1);left:calc(50% - 26px);top:0;}
 .penalty-line{width:60px;height:3px;background:rgba(255,255,255,.45);margin:0 auto;border-radius:2px;}
@@ -255,29 +270,211 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
 .stat-big-card{background:#0d0d0d;border:1px solid var(--border);border-radius:12px;padding:14px;}
 .stat-big-card .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-family:'Space Mono',monospace;margin-bottom:6px;}
 .stat-big-card .val{font-size:24px;font-weight:800;}
+
+/* Refinamiento visual */
+:root{
+  --green:#20c86a;
+  --green-dark:#16a158;
+  --gold:#d6a53b;
+  --red:#e45d5d;
+  --bg:#070908;
+  --card:#101312;
+  --card2:#151a18;
+  --border:#242b28;
+  --border2:#33413b;
+  --text:#f4f7f5;
+  --muted:#77817b;
+  --muted2:#a2aaa5;
+  --shadow:0 24px 70px rgba(0,0,0,.38);
+}
+html{background:var(--bg);}
+body{
+  align-items:flex-start;
+  padding:32px 14px;
+  background:
+    radial-gradient(circle at 50% -12%,rgba(32,200,106,.11),transparent 34%),
+    linear-gradient(180deg,#090c0b 0%,#050605 100%);
+}
+body::before{
+  background:
+    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.014) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.45),transparent 72%);
+}
+#login,#casino,#adminPanel{animation:fadeUp .38s ease both;}
+#login{
+  margin-top:clamp(20px,6vh,72px);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  background:linear-gradient(180deg,rgba(19,23,21,.98),rgba(11,13,12,.98));
+}
+.logo,.loading-logo{letter-spacing:-.04em;}
+.sub,.historial-title,.paytable-title,.w7-pt-title,.settings-group h4,.stat-card .lbl,.stat-big-card .lbl{
+  letter-spacing:.08em;
+}
+.login-tabs,.game-tabs{
+  background:#0b0f0d;
+  border-color:#202823;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+}
+.login-tab,.game-tab,.btn-logout,.btn-adm,.btn-save,.btn-close,
+.btn-login,.btn-apostar,.btn-retirar,.btn-spin,.btn-w7,.btn-gold,.btn-retirar-minas,.btn-nueva-minas{
+  min-height:40px;
+}
+.login-tab.active,.game-tab.active{
+  background:linear-gradient(180deg,#1b211f,#121715);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+input[type=text],input[type=email],input[type=password],input[type=number],select,.admin-input{
+  background:#0a0d0c;
+  border-color:#26312c;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+input:focus,select:focus,.admin-input:focus{
+  border-color:rgba(32,200,106,.72);
+  box-shadow:0 0 0 3px rgba(32,200,106,.11);
+}
+.toggle-pass{color:#8d9892;}
+.creditos-link{color:#d6a53b;text-decoration:none;}
+.modal{background:rgba(3,5,4,.78);}
+.modal-content{
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  background:linear-gradient(180deg,#131715,#0c0f0e);
+}
+#casino{max-width:640px;}
+.header,.admin-header{
+  padding:8px 2px 10px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.stats{gap:12px;}
+.stat-card,.user-card,.stat-big-card,.admin-content,.metodo{
+  background:linear-gradient(180deg,rgba(18,22,20,.98),rgba(11,14,13,.98));
+  border-color:#242d28;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.stat-card{border-radius:12px;text-align:left;padding:14px;}
+.stat-card .val{font-size:20px;letter-spacing:-.02em;}
+.game-tabs{gap:4px;padding:5px;}
+.game-tab{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 6px;
+  font-size:11px!important;
+  line-height:1;
+}
+.field,.slots-machine,.w7-machine,.gold-machine,.minas-machine{
+  border-radius:16px;
+  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.04);
+}
+.field{border-color:#237044;background:linear-gradient(180deg,#104829,#0d3a22);}
+.slots-machine{border-color:#614286;background:linear-gradient(135deg,#191225,#100d19);}
+.w7-machine{border-color:#2a59ba;background:linear-gradient(135deg,#0d1728,#0b1424);}
+.gold-machine{border-color:#9a6b21;background:radial-gradient(ellipse at 50% 0%,#241806,#090806);}
+.minas-machine{border-color:#813232;background:linear-gradient(135deg,#1d1010,#160d0d);}
+.live-machine{
+  position:relative;
+  overflow:hidden;
+  padding:24px;
+  margin-bottom:14px;
+  border:1px solid #2b3430;
+  border-radius:16px;
+  background:linear-gradient(135deg,#111614,#0b0e0d);
+  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.04);
+  text-align:left;
+}
+.live-machine::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 78% 16%,rgba(32,200,106,.14),transparent 34%);
+  pointer-events:none;
+}
+.live-title{position:relative;font-size:18px;font-weight:800;letter-spacing:.02em;margin-bottom:6px;}
+.live-sub{position:relative;color:var(--muted2);font-size:13px;line-height:1.6;margin-bottom:18px;}
+.live-grid{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.live-card{display:flex;flex-direction:column;background:#0a0d0c;border:1px solid #24302a;border-radius:12px;padding:14px;min-height:156px;}
+.live-card .live-label{color:var(--green);font-size:11px;font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+.live-card .live-name{font-size:15px;font-weight:800;margin-bottom:6px;}
+.live-card .live-meta{font-size:12px;color:var(--muted2);line-height:1.4;}
+.live-card .live-min{margin-top:10px;color:#d9c28a;font-size:11px;font-family:'Space Mono',monospace;}
+.live-card .live-enter{margin-top:auto;width:100%;padding:10px 12px;border:1px solid rgba(32,200,106,.45);border-radius:9px;background:rgba(32,200,106,.1);color:#c8f8dc;font-weight:800;font-family:'Syne',sans-serif;cursor:pointer;}
+.live-card .live-enter:hover{background:rgba(32,200,106,.17);border-color:rgba(32,200,106,.75);}
+.live-card .live-enter:disabled{opacity:.5;cursor:not-allowed;}
+.live-actions{position:relative;display:flex;gap:10px;align-items:center;}
+.live-badge{display:inline-flex;align-items:center;gap:7px;color:#c8f8dc;font-size:12px;font-family:'Space Mono',monospace;}
+.live-badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 14px var(--green);}
+.btn-live{margin-left:auto;padding:12px 18px;border:none;border-radius:10px;background:linear-gradient(180deg,#27d677,#18aa5d);color:#041008;font-weight:800;font-family:'Syne',sans-serif;cursor:pointer;}
+.btn-live:disabled{opacity:.6;cursor:not-allowed;}
+.live-result{position:relative;min-height:18px;margin-top:12px;color:var(--muted2);font-size:12px;font-family:'Space Mono',monospace;}
+.live-result.ok{color:var(--green);}
+.live-result.err{color:var(--red);}
+.minas-card.safe,.minas-card.bomba{
+  font-family:'Space Mono',monospace;
+  font-weight:800;
+}
+.minas-card.safe{color:#c7f7d7;}
+.minas-card.bomba{color:#fecaca;}
+.slots-title,.w7-title,.gold-title,.minas-title{
+  font-size:15px;
+  letter-spacing:.12em;
+}
+.paytable,.w7-paytable,.gold-paytable,.minas-stat,.minas-mult-bar{
+  background:rgba(5,7,6,.62);
+}
+.btn-login,.btn-apostar,.btn-save{
+  background:linear-gradient(180deg,#27d677,#18aa5d);
+}
+.btn-login:hover,.btn-apostar:hover:not(:disabled),.btn-save:hover{background:linear-gradient(180deg,#23c66d,#149552);}
+.btn-retirar,.btn-retirar-minas{background:#0a0d0c;}
+.btn-spin,.btn-w7,.btn-gold,.btn-nueva-minas{box-shadow:inset 0 1px 0 rgba(255,255,255,.06);}
+.btn-dir{background:#101412;border-color:#28332e;}
+.btn-dir:hover:not(:disabled){background:#171d1a;border-color:#3b4942;}
+.admin-grid{align-items:start;}
+.admin-nav-btn{border-radius:10px;}
+.admin-nav-btn .icon{display:none;}
+.badge{border-radius:7px;padding:3px 7px;}
+.user-actions{gap:7px;}
+.btn-del::before{content:'Eliminar';}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important;}
+}
 @media(max-width:620px){
+  body{padding:14px 10px;}
   #login{width:95vw;padding:28px 18px;}
   .admin-grid{grid-template-columns:1fr;}
   .admin-sidebar{flex-direction:row;flex-wrap:wrap;}
   .admin-nav-btn{flex:1 1 calc(50% - 3px);}
   #casino{padding:10px;}
+  .header,.admin-header{align-items:flex-start;gap:12px;}
+  .stats{grid-template-columns:1fr;}
+  .game-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));}
+  .game-tab{font-size:10px!important;min-height:38px;}
+  .live-grid{grid-template-columns:1fr;}
+  .live-actions{align-items:stretch;flex-direction:column;}
+  .btn-live{width:100%;margin-left:0;}
+  .bet-row{align-items:stretch;flex-direction:column;}
+  .minas-stats{flex-wrap:wrap;}
   .drums-wrap{gap:3px;}
   .drum{width:82px;height:100px;}
   .drum-symbol{font-size:30px;height:100px;}
   .reel{width:78px;}
   .reel-symbol{font-size:42px;}
+  .gold-cell{height:56px;font-size:28px;}
 }
 </style>
 </head>
 <body>
 
 <div id="loadingScreen">
-  <div class="loading-logo">Black<span>casino</span> ⚽</div>
+  <div class="loading-logo">Black<span>casino</span></div>
   <div class="loading-bar"><div class="loading-bar-inner"></div></div>
 </div>
 
 <div id="login">
-  <div class="logo">Black<span>casino</span> ⚽</div>
+  <div class="logo">Black<span>casino</span></div>
   <div class="sub">Penales · Slots · 777 · Cartas</div>
   <div class="login-tabs">
     <button class="login-tab active" onclick="switchTab('login')">Iniciar sesión</button>
@@ -289,11 +486,11 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
     <label>Contraseña</label>
     <div class="pass-wrap">
       <input id="pass" type="password" placeholder="••••••">
-      <button class="toggle-pass" type="button" onclick="togglePass('pass')">👁</button>
+      <button class="toggle-pass" type="button" onclick="togglePass('pass')" aria-label="Mostrar u ocultar contraseña">Ver</button>
     </div>
-    <button class="btn-login" onclick="login()">Entrar →</button>
+    <button class="btn-login" onclick="login()">Entrar</button>
     <div class="err" id="loginErr"></div>
-    <a class="creditos-link" onclick="abrirCreditos()">💳 ¿Cómo cargar créditos?</a>
+    <a class="creditos-link" onclick="abrirCreditos()">Cómo cargar créditos</a>
   </div>
   <div id="signupForm" class="login-form">
     <label>Usuario</label>
@@ -303,29 +500,70 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
     <label>Contraseña</label>
     <div class="pass-wrap">
       <input id="newPass" type="password" placeholder="Mínimo 8 caracteres" oninput="evalPass(this.value,'sBar','sHint')">
-      <button class="toggle-pass" type="button" onclick="togglePass('newPass')">👁</button>
+      <button class="toggle-pass" type="button" onclick="togglePass('newPass')" aria-label="Mostrar u ocultar contraseña">Ver</button>
     </div>
     <div class="pass-strength"><div class="pass-strength-bar" id="sBar"></div></div>
     <div class="strength-hint" id="sHint"></div>
     <label>Confirmar contraseña</label>
     <div class="pass-wrap">
       <input id="newPass2" type="password" placeholder="Repetí la contraseña">
-      <button class="toggle-pass" type="button" onclick="togglePass('newPass2')">👁</button>
+      <button class="toggle-pass" type="button" onclick="togglePass('newPass2')" aria-label="Mostrar u ocultar contraseña">Ver</button>
     </div>
-    <button class="btn-login" onclick="registrarse()">Crear cuenta →</button>
+    <button class="btn-login" onclick="registrarse()">Crear cuenta</button>
     <div id="signupMsg"></div>
   </div>
 </div>
 
 <div id="creditosModal" class="modal">
   <div class="modal-content">
-    <h2>💳 Cargar Créditos</h2>
+    <h2>Cargar créditos</h2>
     <p>Bienvenido a <strong>Blackcasino</strong>, somos de San Roque González de Santa Cruz.</p>
-    <div class="metodo"><div class="titulo">📱 WhatsApp</div><div class="detalle">+595 992 809980 — Contanos el monto y te guiamos.</div></div>
-    <div class="metodo"><div class="titulo">📧 Correo</div><div class="detalle"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="debba8bbacb9b7aabfadbfb0bdb6bba49eb9b3bfb7b2f0bdb1b3">[email&#160;protected]</a></div></div>
-    <div class="metodo"><div class="titulo">🧾 Comprobante</div><div class="detalle">Transferí y subí tu comprobante. Te acreditamos al instante.</div></div>
-    <p style="margin-top:16px;color:var(--green);text-align:center;font-weight:700;">By Iván — ¡Gracias por preferir Blackcasino!</p>
+    <div class="metodo"><div class="titulo">WhatsApp</div><div class="detalle">+595 992 809980 — Indicá el monto y te guiamos con la carga.</div></div>
+    <div class="metodo"><div class="titulo">Correo</div><div class="detalle"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="debba8bbacb9b7aabfadbfb0bdb6bba49eb9b3bfb7b2f0bdb1b3">[email&#160;protected]</a></div></div>
+    <div class="metodo"><div class="titulo">Comprobante</div><div class="detalle">Enviá el comprobante de transferencia para acreditar el saldo.</div></div>
+    <p style="margin-top:16px;color:var(--green);text-align:center;font-weight:700;">Atención personalizada para cargas y consultas.</p>
     <button class="btn-close" onclick="cerrarCreditos()">Cerrar</button>
+  </div>
+</div>
+
+<div id="perfilModal" class="modal">
+  <div class="modal-content">
+    <h2>Mi perfil</h2>
+    <div class="profile-grid">
+      <div class="profile-block">
+        <h3>Datos de cuenta</h3>
+        <label>Usuario</label>
+        <input id="perfilUsuario" type="text" placeholder="Nombre de usuario">
+        <label>Correo</label>
+        <input id="perfilCorreo" type="email" placeholder="correo@email.com">
+        <button class="btn-save" onclick="guardarPerfilDatos()">Guardar datos</button>
+        <div id="perfilDatosMsg"></div>
+      </div>
+      <div class="profile-block">
+        <h3>Cambiar contraseña</h3>
+        <label>Contraseña actual</label>
+        <div class="pass-wrap">
+          <input id="perfilPassActual" type="password" placeholder="••••••">
+          <button class="toggle-pass" type="button" onclick="togglePass('perfilPassActual')" aria-label="Mostrar u ocultar contraseña">Ver</button>
+        </div>
+        <label>Nueva contraseña</label>
+        <div class="pass-wrap">
+          <input id="perfilPassNueva" type="password" placeholder="Mínimo 8 caracteres">
+          <button class="toggle-pass" type="button" onclick="togglePass('perfilPassNueva')" aria-label="Mostrar u ocultar contraseña">Ver</button>
+        </div>
+        <label>Confirmar contraseña</label>
+        <div class="pass-wrap">
+          <input id="perfilPassConfirmar" type="password" placeholder="Repetí la contraseña">
+          <button class="toggle-pass" type="button" onclick="togglePass('perfilPassConfirmar')" aria-label="Mostrar u ocultar contraseña">Ver</button>
+        </div>
+        <button class="btn-save" onclick="guardarPerfilPass()">Cambiar contraseña</button>
+        <div id="perfilPassMsg"></div>
+      </div>
+    </div>
+    <div class="profile-actions">
+      <button class="btn-close" onclick="cerrarPerfil()">Cerrar</button>
+      <button class="btn-close" onclick="logout()">Cerrar sesión</button>
+    </div>
   </div>
 </div>
 
@@ -334,6 +572,7 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
     <div class="logo">Black<span>casino</span></div>
     <div class="header-right">
       <span class="user-info" id="userLabel"></span>
+      <button class="btn-profile" onclick="abrirPerfil()">Perfil</button>
       <button class="btn-logout" onclick="logout()">Salir</button>
     </div>
   </div>
@@ -343,17 +582,18 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
     <div class="stat-card"><div class="lbl">Multi</div><div class="val green" id="multiDisplay">x1</div></div>
   </div>
   <div class="game-tabs">
-    <button class="game-tab active" onclick="switchGame(0)">⚽<br>Penales</button>
-    <button class="game-tab" onclick="switchGame(1)">🎰<br>Slots</button>
-    <button class="game-tab" onclick="switchGame(2)">7️⃣<br>777</button>
-    <button class="game-tab" onclick="switchGame(3)">🃏<br>Cartas</button>
-    <button class="game-tab" onclick="switchGame(4)">🍀<br>Gold</button>
+    <button class="game-tab active" onclick="switchGame(0)">Penales</button>
+    <button class="game-tab" onclick="switchGame(1)">Slots</button>
+    <button class="game-tab" onclick="switchGame(2)">777</button>
+    <button class="game-tab" onclick="switchGame(3)">Cartas</button>
+    <button class="game-tab" onclick="switchGame(4)">Gold</button>
+    <button class="game-tab" onclick="switchGame(5)">En vivo</button>
   </div>
 
   <!-- PENALES -->
   <div id="gp0" class="game-panel active">
     <div class="field">
-      <div class="arco"><div class="arquero-wrap"><div id="arquero"></div></div></div>
+      <div class="arco"><div class="arquero-wrap"><div id="arquero" aria-label="Arquero"><span class="keeper-head"></span><span class="keeper-arm left"></span><span class="keeper-arm right"></span><span class="keeper-body"></span><span class="keeper-leg left"></span><span class="keeper-leg right"></span></div></div></div>
       <div class="balon-wrap"><div id="balon"></div></div>
       <div class="penalty-line"></div>
       <div class="field-msg" id="fieldMsg"></div>
@@ -368,7 +608,7 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
       <input id="inputApuesta" type="number" min="5000" step="5000" value="20000">
     </div>
     <button class="btn-apostar" id="btnApostar" onclick="apostar()">Apostar 20.000 Gs</button>
-    <button class="btn-retirar" id="btnRetirar" onclick="retirar()" disabled>💰 Retirar premio</button>
+    <button class="btn-retirar" id="btnRetirar" onclick="retirar()" disabled>Retirar premio</button>
     <div class="historial-title">Historial</div>
     <div class="historial" id="historial"></div>
     <p id="resultado"></p>
@@ -378,7 +618,7 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
   <div id="gp1" class="game-panel">
     <div class="slots-machine">
       <div class="slots-lights"><div class="slot-light"></div><div class="slot-light"></div><div class="slot-light"></div><div class="slot-light"></div><div class="slot-light"></div></div>
-      <div class="slots-title">✨ Tragamonedas ✨</div>
+      <div class="slots-title">Tragamonedas</div>
       <div class="reels-wrap">
         <div class="reel" id="reel0"><div class="reel-inner" id="ri0"></div></div>
         <div class="reel" id="reel1"><div class="reel-inner" id="ri1"></div></div>
@@ -401,14 +641,14 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
       <label>Apuesta:</label>
       <input id="inputSlots" type="number" min="5000" step="5000" value="20000">
     </div>
-    <button class="btn-spin" id="btnSpin" onclick="spinSlots()">🎰 GIRAR</button>
+    <button class="btn-spin" id="btnSpin" onclick="spinSlots()">Girar</button>
     <p id="slotsResult"></p>
   </div>
 
   <!-- 777 -->
   <div id="gp2" class="game-panel">
     <div class="w7-machine">
-      <div class="w7-title">🎰 RULETA 777 🎰</div>
+      <div class="w7-title">Ruleta 777</div>
       <div class="drums-wrap">
         <div class="drum" id="drum0"><div class="drum-inner" id="di0"></div></div>
         <div class="drum-sep" style="width:4px;height:80px;background:linear-gradient(180deg,transparent,#1d4ed8,transparent);border-radius:2px;"></div>
@@ -419,7 +659,7 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
       <div class="w7-win" id="w7Win"></div>
       <div class="w7-paytable">
         <div class="w7-pt-title">Tabla de premios</div>
-        <div class="w7-row"><span class="w7-syms">7 · 7 · 7</span><span class="w7-mult">x100 🏆 JACKPOT</span></div>
+        <div class="w7-row"><span class="w7-syms">7 · 7 · 7</span><span class="w7-mult">x100 JACKPOT</span></div>
         <div class="w7-row"><span class="w7-syms">BAR · BAR · BAR</span><span class="w7-mult">x25</span></div>
         <div class="w7-row"><span class="w7-syms">3 iguales</span><span class="w7-mult">x10</span></div>
         <div class="w7-row"><span class="w7-syms">Un 7 cualquiera</span><span class="w7-mult">x2</span></div>
@@ -430,14 +670,14 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
       <label>Apuesta:</label>
       <input id="inputW7" type="number" min="5000" step="5000" value="20000">
     </div>
-    <button class="btn-w7" id="btnW7" onclick="spinW7()">🎰 TIRAR</button>
+    <button class="btn-w7" id="btnW7" onclick="spinW7()">Jugar</button>
     <p id="w7Result"></p>
   </div>
 
   <!-- CARTAS CON BOMBA -->
   <div id="gp3" class="game-panel">
     <div class="minas-machine">
-      <div class="minas-title">💣 Cartas Bomba</div>
+      <div class="minas-title">Cartas bomba</div>
       <div class="minas-sub">Destapá cartas y acumulá multiplicador. ¡Cuidado con la bomba!</div>
       <div class="minas-config">
         <label>Bombas:</label>
@@ -465,19 +705,19 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
       <input id="inputMinas" type="number" min="5000" step="5000" value="20000">
     </div>
     <button class="btn-apostar" id="btnMinasApostar" onclick="apostarMinas()">Apostar y Jugar</button>
-    <button class="btn-retirar-minas" id="btnMinasRetirar" onclick="retirarMinas()" disabled>💰 Retirar <span id="retirarMonto">0 Gs</span></button>
-    <button class="btn-nueva-minas" id="btnMinasNueva" onclick="nuevaPartidaMinas()" style="display:none">🔄 Nueva partida</button>
+    <button class="btn-retirar-minas" id="btnMinasRetirar" onclick="retirarMinas()" disabled>Retirar <span id="retirarMonto">0 Gs</span></button>
+    <button class="btn-nueva-minas" id="btnMinasNueva" onclick="nuevaPartidaMinas()" style="display:none">Nueva partida</button>
     <p id="minasResult"></p>
   </div>
 
-  <!-- GOLD SLOT ULTIMATE -->
+  <!-- GOLD SLOT -->
   <div id="gp4" class="game-panel">
     <div class="gold-machine">
       <div class="gold-lights">
         <div class="gold-light"></div><div class="gold-light"></div><div class="gold-light"></div>
         <div class="gold-light"></div><div class="gold-light"></div><div class="gold-light"></div><div class="gold-light"></div>
       </div>
-      <div class="gold-title">🍀 GOLD SLOT ULTIMATE 🍀</div>
+      <div class="gold-title">Gold Slot</div>
       <div class="gold-grid" id="goldGrid"></div>
       <div class="gold-win" id="goldWin"></div>
       <div class="gold-paytable">
@@ -494,8 +734,44 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
       <label>Apuesta:</label>
       <input id="inputGold" type="number" min="5000" step="5000" value="20000">
     </div>
-    <button class="btn-gold" id="btnGold" onclick="spinGold()">🍀 GIRAR</button>
+    <button class="btn-gold" id="btnGold" onclick="spinGold()">Girar</button>
     <p id="goldResult"></p>
+  </div>
+
+  <!-- CASINO EN VIVO -->
+  <div id="gp5" class="game-panel">
+    <div class="live-machine">
+      <div class="live-title">Casino en vivo</div>
+      <div class="live-sub">Accedé a mesas atendidas por operador. El ingreso se confirma por WhatsApp para validar saldo, cupo y mesa disponible.</div>
+      <div class="live-grid">
+        <div class="live-card">
+          <div class="live-label">Mesa 01</div>
+          <div class="live-name">Ruleta en vivo</div>
+          <div class="live-meta">Mesa rápida con operador y confirmación manual.</div>
+          <div class="live-min">Mínimo: 20.000 Gs</div>
+          <button class="live-enter" type="button" onclick="accederEnVivo('Ruleta en vivo',20000)">Entrar</button>
+        </div>
+        <div class="live-card">
+          <div class="live-label">Mesa 02</div>
+          <div class="live-name">Blackjack en vivo</div>
+          <div class="live-meta">Rondas privadas, cupos limitados y saldo verificado.</div>
+          <div class="live-min">Mínimo: 30.000 Gs</div>
+          <button class="live-enter" type="button" onclick="accederEnVivo('Blackjack en vivo',30000)">Entrar</button>
+        </div>
+        <div class="live-card">
+          <div class="live-label">Mesa 03</div>
+          <div class="live-name">Cartas VIP</div>
+          <div class="live-meta">Mesa coordinada para jugadores verificados.</div>
+          <div class="live-min">Mínimo: 50.000 Gs</div>
+          <button class="live-enter" type="button" onclick="accederEnVivo('Cartas VIP',50000)">Entrar</button>
+        </div>
+      </div>
+      <div class="live-actions">
+        <span class="live-badge">Operadores disponibles</span>
+        <button class="btn-live" type="button" onclick="accederEnVivo('Consulta general',0)">Consultar acceso</button>
+      </div>
+      <div class="live-result" id="liveResult"></div>
+    </div>
   </div>
 </div>
 
@@ -513,15 +789,15 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
     </div>
     <div class="admin-content">
       <div class="admin-section active" id="sec-users">
-        <h3>👥 Gestión de usuarios</h3>
+        <h3>Gestión de usuarios</h3>
         <div id="userList"></div>
       </div>
       <div class="admin-section" id="sec-stats">
-        <h3>📊 Estadísticas</h3>
+        <h3>Estadísticas</h3>
         <div class="stat-big" id="adminStats"></div>
       </div>
       <div class="admin-section" id="sec-settings">
-        <h3>⚙️ Mi cuenta</h3>
+        <h3>Mi cuenta</h3>
         <div class="settings-group">
           <h4>Cambiar usuario</h4>
           <div class="settings-row"><label>Nuevo usuario</label><input type="text" id="adminNewUser" placeholder="Nuevo nombre de usuario"></div>
@@ -536,9 +812,9 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
         </div>
         <div class="settings-group">
           <h4>Cambiar contraseña</h4>
-          <div class="settings-row"><label>Contraseña actual</label><div class="pass-wrap"><input type="password" id="adminOldPass" placeholder="••••••"><button class="toggle-pass" type="button" onclick="togglePass('adminOldPass')">👁</button></div></div>
-          <div class="settings-row"><label>Nueva contraseña</label><div class="pass-wrap"><input type="password" id="adminNewPass" placeholder="Mínimo 8 caracteres" oninput="evalPass(this.value,'sBar2','sHint2')"><button class="toggle-pass" type="button" onclick="togglePass('adminNewPass')">👁</button></div><div class="pass-strength" style="margin-top:6px"><div class="pass-strength-bar" id="sBar2"></div></div><div class="strength-hint" id="sHint2"></div></div>
-          <div class="settings-row"><label>Confirmar nueva</label><div class="pass-wrap"><input type="password" id="adminNewPass2" placeholder="Repetí la contraseña"><button class="toggle-pass" type="button" onclick="togglePass('adminNewPass2')">👁</button></div></div>
+          <div class="settings-row"><label>Contraseña actual</label><div class="pass-wrap"><input type="password" id="adminOldPass" placeholder="••••••"><button class="toggle-pass" type="button" onclick="togglePass('adminOldPass')" aria-label="Mostrar u ocultar contraseña">Ver</button></div></div>
+          <div class="settings-row"><label>Nueva contraseña</label><div class="pass-wrap"><input type="password" id="adminNewPass" placeholder="Mínimo 8 caracteres" oninput="evalPass(this.value,'sBar2','sHint2')"><button class="toggle-pass" type="button" onclick="togglePass('adminNewPass')" aria-label="Mostrar u ocultar contraseña">Ver</button></div><div class="pass-strength" style="margin-top:6px"><div class="pass-strength-bar" id="sBar2"></div></div><div class="strength-hint" id="sHint2"></div></div>
+          <div class="settings-row"><label>Confirmar nueva</label><div class="pass-wrap"><input type="password" id="adminNewPass2" placeholder="Repetí la contraseña"><button class="toggle-pass" type="button" onclick="togglePass('adminNewPass2')" aria-label="Mostrar u ocultar contraseña">Ver</button></div></div>
           <button class="btn-save" onclick="adminCambiarPass()">Cambiar contraseña</button>
           <div id="noticePass"></div>
         </div>
@@ -550,27 +826,24 @@ input:focus{border-color:var(--green);}input::placeholder{color:var(--muted);}
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script>
-// ── FIREBASE ──────────────────────────────────────────────
+// Firebase
 const FC={apiKey:"AIzaSyB15Y32QkVMCx2LvR8AK6UGlcesIUHs3-Y",authDomain:"blackstore-99034.firebaseapp.com",databaseURL:"https://blackstore-99034-default-rtdb.firebaseio.com",projectId:"blackstore-99034",storageBucket:"blackstore-99034.firebasestorage.app",messagingSenderId:"930634558088",appId:"1:930634558088:web:5b23568d24511797d94d3d"};
 firebase.initializeApp(FC);const db=firebase.database();
 
-// ── ESTADO ────────────────────────────────────────────────
-// FIX: usuarios default separados de la lógica, con clave única por usuario
+// Estado inicial
 let usuarios=[
   {usuario:'admin',pass:'1234',email:'admin@blackcasino.com',saldo:0,rol:'admin',verificado:true},
   {usuario:'ivan', pass:'123', email:'ivan@example.com',     saldo:100000,rol:'usuario',verificado:false},
 ];
 let cu=null,premio=0,jugando=false,apBase=20000,animando=false,fbOk=false;
 const MIN=5000;
-const PA={izq:'10%',centro:'calc(50% - 20px)',der:'calc(90% - 40px)'};
+const PA={izq:'10%',centro:'calc(50% - 26px)',der:'calc(90% - 52px)'};
 const PB={izq:'15%',centro:'calc(50% - 26px)',der:'calc(75% - 26px)'};
 
-// FIX: guardarU y cargarUsuarios usan clave 'usuario' como ID único para evitar mezclas de índice
 function cargarUsuarios(cb){
   db.ref('usuarios').once('value').then(s=>{
     const d=s.val();
     if(d){
-      // FIX: Firebase guarda como objeto con índices numéricos; convertir a array correctamente
       usuarios=Object.values(d).filter(u=>u&&u.usuario);
     } else {
       guardarU();
@@ -587,10 +860,8 @@ function cargarUsuarios(cb){
 }
 
 function guardarU(){
-  // FIX: Guardar siempre en localStorage como respaldo
   localStorage.setItem('bc_u',JSON.stringify(usuarios));
   if(!fbOk)return;
-  // FIX: usar usuario como clave en Firebase para evitar duplicados por índice
   const o={};
   usuarios.forEach(u=>{
     if(u&&u.usuario) o[u.usuario.replace(/[.#$[\]]/g,'_')]=u;
@@ -636,7 +907,7 @@ function switchTab(t){
 function evalPass(v,bId,hId){
   const b=document.getElementById(bId),h=document.getElementById(hId);if(!b||!h)return;
   let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
-  const lv=[{w:'0%',c:'transparent',t:''},{w:'25%',c:'#ef4444',t:'⚠ Muy débil'},{w:'50%',c:'#f59e0b',t:'🔶 Débil'},{w:'75%',c:'#3b82f6',t:'🔷 Media'},{w:'100%',c:'#22c55e',t:'✅ Fuerte'}];
+  const lv=[{w:'0%',c:'transparent',t:''},{w:'25%',c:'#ef4444',t:'Muy débil'},{w:'50%',c:'#f59e0b',t:'Débil'},{w:'75%',c:'#3b82f6',t:'Media'},{w:'100%',c:'#22c55e',t:'Fuerte'}];
   b.style.width=lv[s].w;b.style.background=lv[s].c;h.style.color=lv[s].c;h.textContent=lv[s].t;
 }
 
@@ -658,7 +929,7 @@ function registrarse(){
   if(usuarios.find(x=>x.email===em)){show('Ese correo ya está registrado.',false);return;}
   usuarios.push({usuario:u,pass:p,email:em,saldo:0,rol:'usuario',verificado:false});
   guardarU();
-  show('✓ ¡Cuenta creada! Ya podés iniciar sesión.',true);
+  show('Cuenta creada. Ya podés iniciar sesión.',true);
   setTimeout(()=>switchTab('login'),1800);
   ['newUser','newEmail','newPass','newPass2'].forEach(id=>document.getElementById(id).value='');
 }
@@ -666,13 +937,11 @@ function registrarse(){
 function login(){
   const raw=document.getElementById('user').value.trim();
   const p=document.getElementById('pass').value;
-  // FIX: Buscar en el array actualizado
   const user=usuarios.find(x=>(x.usuario===raw||x.email===raw)&&x.pass===p);
   if(!user){
-    document.getElementById('loginErr').textContent='❌ Usuario o contraseña incorrecta.';
+    document.getElementById('loginErr').textContent='Usuario o contraseña incorrecta.';
     return;
   }
-  // FIX: cu apunta al objeto real del array (por referencia), no a una copia
   cu=user;
   guardarSesion(user.usuario);
   document.getElementById('loginErr').textContent='';
@@ -686,13 +955,13 @@ function logout(){
   document.getElementById('login').style.display='block';
   document.getElementById('casino').style.display='none';
   document.getElementById('adminPanel').style.display='none';
+  document.getElementById('perfilModal').classList.remove('show');
   document.getElementById('user').value='';document.getElementById('pass').value='';
 }
 
 function showCasino(){
   document.getElementById('casino').style.display='block';
-  // FIX: usar cu.usuario directamente (cu ya es la referencia al objeto)
-  document.getElementById('userLabel').textContent='👤 '+cu.usuario;
+  document.getElementById('userLabel').textContent=cu.usuario;
   resetJuego();initReels();initDrums();configurarMinas();initGoldGrid();
 }
 
@@ -704,14 +973,79 @@ function showAdmin(){
 function abrirCreditos(){document.getElementById('creditosModal').classList.add('show');}
 function cerrarCreditos(){document.getElementById('creditosModal').classList.remove('show');}
 
-// GAME TABS
-const GAMES=['gp0','gp1','gp2','gp3','gp4'];
+function perfilNotice(id,msg,ok){
+  const el=document.getElementById(id);
+  el.innerHTML=`<div class="notice ${ok?'ok':'err'}">${msg}</div>`;
+  setTimeout(()=>el.innerHTML='',3200);
+}
+
+function abrirPerfil(){
+  if(!cu)return;
+  document.getElementById('perfilUsuario').value=cu.usuario||'';
+  document.getElementById('perfilCorreo').value=cu.email||'';
+  ['perfilPassActual','perfilPassNueva','perfilPassConfirmar'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('perfilDatosMsg').innerHTML='';
+  document.getElementById('perfilPassMsg').innerHTML='';
+  document.getElementById('perfilModal').classList.add('show');
+}
+
+function cerrarPerfil(){
+  document.getElementById('perfilModal').classList.remove('show');
+}
+
+function guardarPerfilDatos(){
+  if(!cu)return;
+  const nuevoUsuario=document.getElementById('perfilUsuario').value.trim();
+  const nuevoCorreo=document.getElementById('perfilCorreo').value.trim();
+  if(!nuevoUsuario){perfilNotice('perfilDatosMsg','Ingresá un usuario.',false);return;}
+  if(!nuevoCorreo||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(nuevoCorreo)){perfilNotice('perfilDatosMsg','Correo inválido.',false);return;}
+  if(usuarios.find(u=>u.usuario===nuevoUsuario&&u!==cu)){perfilNotice('perfilDatosMsg','Ese usuario ya existe.',false);return;}
+  if(usuarios.find(u=>u.email===nuevoCorreo&&u!==cu)){perfilNotice('perfilDatosMsg','Ese correo ya está en uso.',false);return;}
+  cu.usuario=nuevoUsuario;
+  cu.email=nuevoCorreo;
+  guardarU();
+  guardarSesion(cu.usuario);
+  document.getElementById('userLabel').textContent=cu.usuario;
+  perfilNotice('perfilDatosMsg','Datos actualizados.',true);
+}
+
+function guardarPerfilPass(){
+  if(!cu)return;
+  const actual=document.getElementById('perfilPassActual').value;
+  const nueva=document.getElementById('perfilPassNueva').value;
+  const confirmar=document.getElementById('perfilPassConfirmar').value;
+  if(actual!==cu.pass){perfilNotice('perfilPassMsg','Contraseña actual incorrecta.',false);return;}
+  if(!passOk(nueva)){perfilNotice('perfilPassMsg','La nueva contraseña debe tener mínimo 8 caracteres.',false);return;}
+  if(nueva!==confirmar){perfilNotice('perfilPassMsg','Las contraseñas no coinciden.',false);return;}
+  cu.pass=nueva;
+  guardarU();
+  ['perfilPassActual','perfilPassNueva','perfilPassConfirmar'].forEach(id=>document.getElementById(id).value='');
+  perfilNotice('perfilPassMsg','Contraseña actualizada.',true);
+}
+
+function accederEnVivo(mesa,minimo){
+  const result=document.getElementById('liveResult');
+  const saldo=cu&&cu.saldo?cu.saldo:0;
+  if(minimo>0&&saldo<minimo){
+    result.className='live-result err';
+    result.textContent=`Saldo mínimo requerido: ${minimo.toLocaleString()} Gs. Cargá créditos para ingresar.`;
+    return;
+  }
+  result.className='live-result ok';
+  result.textContent='Abriendo sala en vivo...';
+  const usuario=cu&&cu.usuario?cu.usuario:'';
+  const query=new URLSearchParams({mesa,saldo:String(saldo),usuario}).toString();
+  window.location.href='/casino-en-vivo?'+query;
+}
+
+// Juegos
+const GAMES=['gp0','gp1','gp2','gp3','gp4','gp5'];
 function switchGame(idx){
   document.querySelectorAll('.game-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
   GAMES.forEach((id,i)=>document.getElementById(id).classList.toggle('active',i===idx));
 }
 
-// ── ADMIN ─────────────────────────────────────────────────
+// Administración
 function adminNav(sec){
   ['users','stats','settings'].forEach(s=>{
     document.getElementById('nav-'+s).classList.toggle('active',s===sec);
@@ -723,7 +1057,6 @@ function adminNav(sec){
 function renderAdmin(){
   const list=document.getElementById('userList');
   list.innerHTML='';
-  // FIX: mostrar todos los usuarios excepto el admin actual
   const others=usuarios.filter(u=>u&&u.usuario&&u.usuario!==cu.usuario);
   if(!others.length){
     list.innerHTML='<p style="color:var(--muted);font-size:13px">No hay otros usuarios registrados.</p>';
@@ -733,15 +1066,14 @@ function renderAdmin(){
     const d=document.createElement('div');
     d.className='user-card';
     const rb=u.rol==='admin'?'<span class="badge admin-b">ADMIN</span>':'<span class="badge user-b">USUARIO</span>';
-    const vb=u.verificado?'<span class="badge verif">✅ Verificado</span>':'<span class="badge noverif">❌ Sin verificar</span>';
-    const bv=!u.verificado?`<button class="btn-adm btn-verify" onclick="verificarUser('${u.usuario}')">✅ Verificar</button>`:'';
+    const vb=u.verificado?'<span class="badge verif">Verificado</span>':'<span class="badge noverif">Sin verificar</span>';
+    const bv=!u.verificado?`<button class="btn-adm btn-verify" onclick="verificarUser('${u.usuario}')">Verificar</button>`:'';
     const br=u.rol==='usuario'
-      ?`<button class="btn-adm btn-role" onclick="hacerAdmin('${u.usuario}')">👑 Hacer admin</button>`
-      :`<button class="btn-adm btn-unrole" onclick="quitarAdmin('${u.usuario}')">🔽 Quitar admin</button>`;
-    // FIX: ID del input usa nombre sanitizado
+      ?`<button class="btn-adm btn-role" onclick="hacerAdmin('${u.usuario}')">Hacer admin</button>`
+      :`<button class="btn-adm btn-unrole" onclick="quitarAdmin('${u.usuario}')">Quitar admin</button>`;
     const safeId=u.usuario.replace(/[^a-zA-Z0-9]/g,'_');
     d.innerHTML=`<div class="user-card-top"><div>
-      <div class="user-card-name">👤 ${u.usuario}</div>
+      <div class="user-card-name">${u.usuario}</div>
       <div class="user-card-email">${u.email||'Sin correo'}</div>
       <div class="badges">${rb}${vb}</div></div></div>
       <div class="user-card-saldo">${(u.saldo||0).toLocaleString()} Gs</div>
@@ -750,7 +1082,7 @@ function renderAdmin(){
         <button class="btn-adm btn-add" onclick="agregarSaldo('${u.usuario}')">+ Saldo</button>
         <button class="btn-adm btn-rem" onclick="quitarSaldo('${u.usuario}')">− Saldo</button>
         ${br}${bv}
-        <button class="btn-adm btn-del" onclick="eliminarUser('${u.usuario}')">🗑</button>
+        <button class="btn-adm btn-del" onclick="eliminarUser('${u.usuario}')"></button>
       </div>`;
     list.appendChild(d);
   });
@@ -770,7 +1102,6 @@ function renderStats(){
     <div class="stat-big-card"><div class="lbl">Total cuentas</div><div class="val">${usuarios.length}</div></div>`;
 }
 
-// FIX: funciones admin buscan por nombre de usuario, no por índice
 function getAmt(usuario){
   const safeId=usuario.replace(/[^a-zA-Z0-9]/g,'_');
   const el=document.getElementById('amt_'+safeId);
@@ -799,25 +1130,25 @@ function eliminarUser(n){if(!confirm(`¿Eliminar cuenta de "${n}"?`))return;usua
 function showNotice(id,msg,ok){const el=document.getElementById(id);el.innerHTML=`<div class="notice ${ok?'ok':'err'}">${msg}</div>`;setTimeout(()=>el.innerHTML='',3000);}
 function adminCambiarUsuario(){
   const nu=document.getElementById('adminNewUser').value.trim();
-  if(!nu){showNotice('noticeUsuario','⚠ Ingresá el nuevo usuario.',false);return;}
-  if(usuarios.find(x=>x.usuario===nu&&x.usuario!==cu.usuario)){showNotice('noticeUsuario','❌ Ese usuario ya existe.',false);return;}
-  cu.usuario=nu;guardarU();guardarSesion(nu);document.getElementById('adminNewUser').value='';showNotice('noticeUsuario','✅ Usuario actualizado.',true);
+  if(!nu){showNotice('noticeUsuario','Ingresá el nuevo usuario.',false);return;}
+  if(usuarios.find(x=>x.usuario===nu&&x.usuario!==cu.usuario)){showNotice('noticeUsuario','Ese usuario ya existe.',false);return;}
+  cu.usuario=nu;guardarU();guardarSesion(nu);document.getElementById('adminNewUser').value='';showNotice('noticeUsuario','Usuario actualizado.',true);
 }
 function adminCambiarCorreo(){
   const ne=document.getElementById('adminNewEmail').value.trim();
-  if(!ne||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ne)){showNotice('noticeCorreo','❌ Correo inválido.',false);return;}
-  if(usuarios.find(x=>x.email===ne&&x.usuario!==cu.usuario)){showNotice('noticeCorreo','❌ Ese correo ya está en uso.',false);return;}
-  cu.email=ne;guardarU();document.getElementById('adminNewEmail').value='';showNotice('noticeCorreo','✅ Correo actualizado.',true);
+  if(!ne||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ne)){showNotice('noticeCorreo','Correo inválido.',false);return;}
+  if(usuarios.find(x=>x.email===ne&&x.usuario!==cu.usuario)){showNotice('noticeCorreo','Ese correo ya está en uso.',false);return;}
+  cu.email=ne;guardarU();document.getElementById('adminNewEmail').value='';showNotice('noticeCorreo','Correo actualizado.',true);
 }
 function adminCambiarPass(){
   const old=document.getElementById('adminOldPass').value,np=document.getElementById('adminNewPass').value,np2=document.getElementById('adminNewPass2').value;
-  if(old!==cu.pass){showNotice('noticePass','❌ Contraseña actual incorrecta.',false);return;}
-  if(!passOk(np)){showNotice('noticePass','⚠ Mínimo 8 caracteres.',false);return;}
-  if(np!==np2){showNotice('noticePass','❌ Las contraseñas no coinciden.',false);return;}
-  cu.pass=np;guardarU();['adminOldPass','adminNewPass','adminNewPass2'].forEach(id=>document.getElementById(id).value='');showNotice('noticePass','✅ Contraseña actualizada.',true);
+  if(old!==cu.pass){showNotice('noticePass','Contraseña actual incorrecta.',false);return;}
+  if(!passOk(np)){showNotice('noticePass','Mínimo 8 caracteres.',false);return;}
+  if(np!==np2){showNotice('noticePass','Las contraseñas no coinciden.',false);return;}
+  cu.pass=np;guardarU();['adminOldPass','adminNewPass','adminNewPass2'].forEach(id=>document.getElementById(id).value='');showNotice('noticePass','Contraseña actualizada.',true);
 }
 
-// ── PENALES ───────────────────────────────────────────────
+// Penales
 function resetJuego(){
   premio=0;jugando=false;apBase=leerAp();setDirBtns(false);
   document.getElementById('btnApostar').disabled=false;
@@ -839,16 +1170,16 @@ function leerAp(){const i=document.getElementById('inputApuesta');let v=parseInt
 function setDirBtns(en){['btnIzq','btnCen','btnDer'].forEach(id=>document.getElementById(id).disabled=!en);}
 function mArq(d,a=true){const e=document.getElementById('arquero');if(!a){e.style.transition='none';setTimeout(()=>e.style.transition='left .35s cubic-bezier(.4,0,.2,1)',50);}e.style.left=PA[d];}
 function mBal(d,a=true){const e=document.getElementById('balon');if(!a){e.style.transition='none';setTimeout(()=>e.style.transition='all .4s cubic-bezier(.4,0,.2,1)',50);}e.style.left=PB[d];e.style.top=a?'-60px':'0px';}
-function mostrarMsg(t){const e=document.getElementById('fieldMsg');e.textContent=t==='gol'?'⚽ GOOOL!':'🧤 ¡Atajado!';e.className='field-msg show '+(t==='gol'?'gol':'ataj');setTimeout(()=>e.className='field-msg',1400);}
+function mostrarMsg(t){const e=document.getElementById('fieldMsg');e.textContent=t==='gol'?'Gol':'Atajado';e.className='field-msg show '+(t==='gol'?'gol':'ataj');setTimeout(()=>e.className='field-msg',1400);}
 function agregarH(t){const c=document.getElementById('historial'),x=document.createElement('div');x.className='tick';x.textContent=t==='gol'?'⚽':'🧤';c.appendChild(x);}
 function apostar(){
   if(animando)return;apBase=leerAp();
-  if((cu.saldo||0)<apBase){document.getElementById('resultado').textContent='❌ Saldo insuficiente.';return;}
+  if((cu.saldo||0)<apBase){document.getElementById('resultado').textContent='Saldo insuficiente.';return;}
   if(jugando){document.getElementById('resultado').textContent='Ya hay apuesta activa.';return;}
   cu.saldo-=apBase;guardarU();premio=apBase;jugando=true;
   document.getElementById('btnApostar').disabled=true;document.getElementById('btnRetirar').disabled=false;
   setDirBtns(true);mArq('centro',false);mBal('centro',false);actualizar();
-  document.getElementById('resultado').textContent='⚽ ¡Elegí la dirección!';
+  document.getElementById('resultado').textContent='Elegí la dirección del remate.';
 }
 function tirar(dir){
   if(!jugando||animando)return;animando=true;setDirBtns(false);
@@ -857,8 +1188,8 @@ function tirar(dir){
   const ad=Math.random()<saveChance?dir:ops[Math.floor(Math.random()*3)];
   mBal(dir,true);setTimeout(()=>mArq(ad,true),100);
   setTimeout(()=>{
-    if(dir===ad){mostrarMsg('ataj');agregarH('ataj');document.getElementById('resultado').textContent='🧤 ¡Atajado! Perdiste todo.';premio=0;jugando=false;document.getElementById('btnRetirar').disabled=true;document.getElementById('btnApostar').disabled=false;}
-    else{premio*=2;mostrarMsg('gol');agregarH('gol');document.getElementById('resultado').textContent=`⚽ ¡GOOOL! Premio: ${premio.toLocaleString()} Gs`;setDirBtns(true);}
+    if(dir===ad){mostrarMsg('ataj');agregarH('ataj');document.getElementById('resultado').textContent='Atajado. Perdiste la apuesta.';premio=0;jugando=false;document.getElementById('btnRetirar').disabled=true;document.getElementById('btnApostar').disabled=false;}
+    else{premio*=2;mostrarMsg('gol');agregarH('gol');document.getElementById('resultado').textContent=`Gol. Premio: ${premio.toLocaleString()} Gs`;setDirBtns(true);}
     actualizar();animando=false;setTimeout(()=>mBal('centro',false),600);
   },500);
 }
@@ -866,12 +1197,12 @@ function retirar(){
   if(!jugando||premio<=0||animando)return;cu.saldo+=premio;guardarU();
   const g=premio;premio=0;jugando=false;setDirBtns(false);
   document.getElementById('btnRetirar').disabled=true;document.getElementById('btnApostar').disabled=false;
-  document.getElementById('resultado').textContent=`💰 ¡Retiraste ${g.toLocaleString()} Gs!`;actualizar();
+  document.getElementById('resultado').textContent=`Retiraste ${g.toLocaleString()} Gs.`;actualizar();
   setTimeout(()=>{mArq('centro',false);mBal('centro',false);},300);
 }
 document.getElementById('inputApuesta').addEventListener('change',()=>{apBase=leerAp();if(!jugando)actualizar();});
 
-// ── TRAGAMONEDAS ──────────────────────────────────────────
+// Tragamonedas
 const SS=['🍇','🍊','🍋','🍒','⭐','7️⃣','💎'];
 function weightedSlotSym(){
   const r=Math.random();
@@ -896,10 +1227,10 @@ function leerAp2(id){const i=document.getElementById(id);let v=parseInt(i.value,
 function spinSlots(){
   if(slotSpin)return;
   const ap=leerAp2('inputSlots');
-  if((cu.saldo||0)<ap){document.getElementById('slotsResult').textContent='❌ Saldo insuficiente.';return;}
+  if((cu.saldo||0)<ap){document.getElementById('slotsResult').textContent='Saldo insuficiente.';return;}
   cu.saldo-=ap;guardarU();actualizar();
   slotSpin=true;document.getElementById('btnSpin').disabled=true;
-  document.getElementById('slotsResult').textContent='🎰 Girando...';document.getElementById('slotsWin').textContent='';
+  document.getElementById('slotsResult').textContent='Girando...';document.getElementById('slotsWin').textContent='';
   [0,1,2].forEach(i=>document.getElementById('reel'+i).classList.remove('reel-winner'));
   let res=[weightedSlotSym(),weightedSlotSym(),weightedSlotSym()];
   if((SW[res.join('')]||0)>0 && Math.random()<0.38){
@@ -929,7 +1260,7 @@ function spinSlots(){
           [0,1,2].forEach(i=>document.getElementById('reel'+i).classList.add('reel-winner'));
           setTimeout(()=>[0,1,2].forEach(i=>document.getElementById('reel'+i).classList.remove('reel-winner')),2000);
         }else{
-          document.getElementById('slotsResult').textContent=`❌ ${res.join('')} Perdiste ${ap.toLocaleString()} Gs.`;
+          document.getElementById('slotsResult').textContent=`${res.join('')} Perdiste ${ap.toLocaleString()} Gs.`;
           document.getElementById('slotsWin').textContent='';
         }
         actualizar();slotSpin=false;document.getElementById('btnSpin').disabled=false;
@@ -938,7 +1269,7 @@ function spinSlots(){
   });
 }
 
-// ── RULETA 777 ────────────────────────────────────────────
+// Ruleta 777
 const D7=['7','BAR','🔔','💎','🍒','⭐','🍋','🍊'];
 const D7L={'7':'SIETE','BAR':'BAR','🔔':'BELL','💎':'GEM','🍒':'CHERRY','⭐':'STAR','🍋':'LEMON','🍊':'ORANGE'};
 function d7Random(){
@@ -970,10 +1301,10 @@ function initDrums(){
 function spinW7(){
   if(w7Spin)return;
   const ap=leerAp2('inputW7');
-  if((cu.saldo||0)<ap){document.getElementById('w7Result').textContent='❌ Saldo insuficiente.';return;}
+  if((cu.saldo||0)<ap){document.getElementById('w7Result').textContent='Saldo insuficiente.';return;}
   cu.saldo-=ap;guardarU();actualizar();
   w7Spin=true;document.getElementById('btnW7').disabled=true;
-  document.getElementById('w7Result').textContent='🎰 Girando...';document.getElementById('w7Win').textContent='';
+  document.getElementById('w7Result').textContent='Girando...';document.getElementById('w7Win').textContent='';
   [0,1,2].forEach(i=>document.getElementById('drum'+i).classList.remove('drum-winner'));
   const res=[d7Random(),d7Random(),d7Random()];
   let done=0;
@@ -995,7 +1326,7 @@ function spinW7(){
       if(done===3){
         const s0=res[0],s1=res[1],s2=res[2];
         let m=0,msg='';
-        if(s0==='7'&&s1==='7'&&s2==='7'){m=100;msg='🏆 ¡JACKPOT 777!';}
+        if(s0==='7'&&s1==='7'&&s2==='7'){m=100;msg='JACKPOT 777.';}
         else if(s0==='BAR'&&s1==='BAR'&&s2==='BAR'){m=25;msg='🎯 ¡BAR BAR BAR!';}
         else if(s0===s1&&s1===s2){m=10;msg=`✨ ¡${s0} ${s1} ${s2}! Tres iguales`;}
         else if(s0==='7'||s1==='7'||s2==='7'){m=2;msg='⭐ ¡Hay un 7!';}
@@ -1008,7 +1339,7 @@ function spinW7(){
           [0,1,2].forEach(i=>document.getElementById('drum'+i).classList.add('drum-winner'));
           setTimeout(()=>[0,1,2].forEach(i=>document.getElementById('drum'+i).classList.remove('drum-winner')),2500);
         }else{
-          document.getElementById('w7Result').textContent=`❌ ${s0} ${s1} ${s2} — Perdiste ${ap.toLocaleString()} Gs.`;
+          document.getElementById('w7Result').textContent=`${s0} ${s1} ${s2} — Perdiste ${ap.toLocaleString()} Gs.`;
           document.getElementById('w7Win').textContent='';
         }
         actualizar();w7Spin=false;document.getElementById('btnW7').disabled=false;
@@ -1019,21 +1350,19 @@ function spinW7(){
 
 // ── CARTAS BOMBA ──────────────────────────────────────────
 const TOTAL_CARDS=25;
-const SAFE_EMOJIS=['🌟','💎','🏆','🎯','🍀','⚡','🔮','🎰','💰','🌈','🦁','🐯','🦊','🌺','🎸'];
+const SAFE_MARKS=['◆','●','▲','■','✦','✧','◇','◆','●','▲'];
 let minasBoardActive=false,minasAp=0,minasRevealed=0,minasBoard=[],minasBombCount=3;
 
-// Tabla de multiplicadores según bombas y cartas reveladas
 function calcMult(revealed,bombs){
   const safe=TOTAL_CARDS-bombs;
   if(revealed===0)return 1;
-  // Multiplicador acumulativo basado en probabilidad
   let m=1;
   for(let i=0;i<revealed;i++){
     const remaining=TOTAL_CARDS-i;
     const safePick=safe-i;
-    m*=(remaining/safePick)*1.01; // ligero sesgo a favor de la casa
+    m*=(remaining/safePick)*1.01;
   }
-  return Math.max(1,Math.round(m*100)/100*0.95);
+  return Math.max(1,Math.round(m*0.95*100)/100);
 }
 
 function configurarMinas(){
@@ -1042,7 +1371,6 @@ function configurarMinas(){
   document.getElementById('minasTotal').textContent=TOTAL_CARDS;
   document.getElementById('minasBombas').textContent=minasBombCount;
   document.getElementById('minasSeguras').textContent=seguras;
-  // Si no hay partida activa, reiniciar visual
   if(!minasBoardActive)renderMinasBoard(false);
 }
 
@@ -1061,11 +1389,10 @@ function renderMinasBoard(active){
 function apostarMinas(){
   if(minasBoardActive)return;
   minasAp=leerAp2('inputMinas');
-  if((cu.saldo||0)<minasAp){document.getElementById('minasResult').textContent='❌ Saldo insuficiente.';return;}
+  if((cu.saldo||0)<minasAp){document.getElementById('minasResult').textContent='Saldo insuficiente.';return;}
   minasBombCount=parseInt(document.getElementById('minasCount').value)||3;
-  // Generar tablero: 0=segura, 1=bomba
   minasBoard=Array(TOTAL_CARDS).fill(0);
-  // Colocar bombas aleatoriamente
+
   let placed=0;
   while(placed<minasBombCount){
     const idx=Math.floor(Math.random()*TOTAL_CARDS);
@@ -1077,7 +1404,7 @@ function apostarMinas(){
   document.getElementById('btnMinasApostar').disabled=true;
   document.getElementById('btnMinasRetirar').disabled=false;
   document.getElementById('btnMinasNueva').style.display='none';
-  document.getElementById('minasResult').textContent='🃏 ¡Destapá cartas! Retirá cuando quieras.';
+  document.getElementById('minasResult').textContent='Elegí una carta. Podés retirar en cualquier momento.';
   document.getElementById('minasCount').disabled=true;
   renderMinasBoard(true);
   actualizarMultBar();
@@ -1090,15 +1417,14 @@ function destapaCarta(idx){
   card.classList.add('revealed','disabled');
   card.onclick=null;
   if(minasBoard[idx]===1){
-    // BOMBA
-    card.textContent='💣';
+    card.textContent='!';
     card.classList.add('bomba');
-    // Revelar todas las bombas restantes
+
     setTimeout(()=>{
       for(let i=0;i<TOTAL_CARDS;i++){
         if(minasBoard[i]===1&&i!==idx){
           const bc=document.getElementById('mc_'+i);
-          if(bc){bc.classList.add('revealed','bomba');bc.textContent='💣';}
+          if(bc){bc.classList.add('revealed','bomba');bc.textContent='!';}
         } else if(minasBoard[i]===0){
           const sc=document.getElementById('mc_'+i);
           if(sc&&!sc.classList.contains('revealed')){sc.classList.add('hidden-safe');}
@@ -1109,24 +1435,22 @@ function destapaCarta(idx){
     document.getElementById('btnMinasRetirar').disabled=true;
     document.getElementById('btnMinasApostar').disabled=true;
     document.getElementById('btnMinasNueva').style.display='block';
-    document.getElementById('minasResult').textContent=`💥 ¡BOOM! Perdiste ${minasAp.toLocaleString()} Gs.`;
+    document.getElementById('minasResult').textContent=`Bomba. Perdiste ${minasAp.toLocaleString()} Gs.`;
     document.getElementById('multVal').textContent='x0';
     document.getElementById('multFill').style.width='100%';
     document.getElementById('multFill').style.background='#ef4444';
     document.getElementById('minasCount').disabled=false;
     actualizarMinas();
   } else {
-    // SEGURA
-    const emoji=SAFE_EMOJIS[Math.floor(Math.random()*SAFE_EMOJIS.length)];
-    card.textContent=emoji;
+    card.textContent=SAFE_MARKS[Math.floor(Math.random()*SAFE_MARKS.length)];
     card.classList.add('safe');
     minasRevealed++;
     actualizarMultBar();
     const mult=calcMult(minasRevealed,minasBombCount);
     const premioActual=Math.floor(minasAp*mult);
     document.getElementById('retirarMonto').textContent=premioActual.toLocaleString()+' Gs';
-    document.getElementById('minasResult').textContent=`✅ ¡Carta segura! Multiplicador: x${mult.toFixed(2)} — Premio: ${premioActual.toLocaleString()} Gs`;
-    // Si reveló todas las cartas seguras, ganar automáticamente
+    document.getElementById('minasResult').textContent=`Carta segura. Multiplicador: x${mult.toFixed(2)} — Premio: ${premioActual.toLocaleString()} Gs`;
+
     if(minasRevealed>=TOTAL_CARDS-minasBombCount){
       setTimeout(()=>retirarMinas(true),400);
     }
@@ -1155,19 +1479,19 @@ function retirarMinas(auto=false){
   document.getElementById('btnMinasApostar').disabled=true;
   document.getElementById('btnMinasNueva').style.display='block';
   document.getElementById('minasCount').disabled=false;
-  // Marcar cartas sin destapar como ocultas
+
   for(let i=0;i<TOTAL_CARDS;i++){
     const c=document.getElementById('mc_'+i);
     if(c&&!c.classList.contains('revealed')){
       c.classList.add('disabled');
       c.onclick=null;
-      if(minasBoard[i]===1){c.classList.add('bomba');c.textContent='💣';c.classList.add('revealed');}
+      if(minasBoard[i]===1){c.classList.add('bomba');c.textContent='!';c.classList.add('revealed');}
     }
   }
   if(auto){
-    document.getElementById('minasResult').textContent=`🏆 ¡TODAS SEGURAS! Ganaste ${ganancia.toLocaleString()} Gs (x${mult.toFixed(2)})`;
+    document.getElementById('minasResult').textContent=`Todas seguras. Ganaste ${ganancia.toLocaleString()} Gs (x${mult.toFixed(2)})`;
   } else {
-    document.getElementById('minasResult').textContent=`💰 ¡Retiraste ${ganancia.toLocaleString()} Gs! (x${mult.toFixed(2)})`;
+    document.getElementById('minasResult').textContent=`Retiraste ${ganancia.toLocaleString()} Gs (x${mult.toFixed(2)})`;
   }
   actualizarMinas();
 }
@@ -1191,7 +1515,7 @@ function actualizarMinas(){
   actualizar();
 }
 
-// ── FIREBASE SYNC ─────────────────────────────────────────
+// Sincronización
 db.ref('.info/connected').on('value',snap=>{
   if(snap.val()===true){
     fbOk=true;
@@ -1199,7 +1523,6 @@ db.ref('.info/connected').on('value',snap=>{
       db.ref('usuarios').once('value').then(s=>{
         const d=s.val();
         if(!d)return;
-        // FIX: Firebase usa nombre de usuario como clave ahora
         const arr=Object.values(d).filter(u=>u&&u.usuario);
         const remoto=arr.find(x=>x.usuario===cu.usuario);
         if(remoto){
@@ -1213,7 +1536,7 @@ db.ref('.info/connected').on('value',snap=>{
   }else fbOk=false;
 });
 
-// ── GOLD SLOT ULTIMATE ────────────────────────────────────
+// Gold Slot
 const GS_SYMS=['🍀','🪙','💰','🐎','🏠'];
 function gsRandom(){
   const r=Math.random();
@@ -1257,11 +1580,11 @@ function dropCoinsGold(){
 function spinGold(){
   if(goldSpin)return;
   const ap=leerAp2('inputGold');
-  if((cu.saldo||0)<ap){document.getElementById('goldResult').textContent='❌ Saldo insuficiente.';return;}
+  if((cu.saldo||0)<ap){document.getElementById('goldResult').textContent='Saldo insuficiente.';return;}
   cu.saldo-=ap;guardarU();actualizar();
   goldSpin=true;
   document.getElementById('btnGold').disabled=true;
-  document.getElementById('goldResult').textContent='🍀 Girando...';
+  document.getElementById('goldResult').textContent='Girando...';
   document.getElementById('goldWin').textContent='';
   const cells=document.querySelectorAll('.gold-cell');
   cells.forEach(c=>{c.classList.add('spin-anim');c.classList.remove('win-cell');});
@@ -1291,8 +1614,8 @@ function spinGold(){
       const allSame=rowSyms.every(s=>s===rowSyms[0]);
       if(allSame){
         let rm=0;
-        if(rowSyms[0]==='🏠'){rm=20;bonusMsg='🏠 ¡JACKPOT CASAS! ';}
-        else if(rowSyms[0]==='💰'){rm=10;bonusMsg='💰 ¡FILA DE ORO! ';}
+        if(rowSyms[0]==='🏠'){rm=20;bonusMsg='JACKPOT Casas. ';}
+        else if(rowSyms[0]==='💰'){rm=10;bonusMsg='Fila de oro. ';}
         else if(rowSyms[0]==='🐎'){rm=8;bonusMsg='🐎 ¡FILA DE CABALLOS! ';}
         else if(rowSyms[0]==='🪙'){rm=4;bonusMsg='🪙 ¡Fila de monedas! ';}
         if(rm>bonusMult){bonusMult=rm;}
@@ -1325,7 +1648,7 @@ function spinGold(){
       totalWin=Math.floor(totalWin*0.94);
       cu.saldo+=totalWin;guardarU();
       document.getElementById('goldWin').textContent=`+${totalWin.toLocaleString()} Gs`;
-      document.getElementById('goldResult').textContent=resultMsg||`💰 Ganaste ${totalWin.toLocaleString()} Gs`;
+      document.getElementById('goldResult').textContent=resultMsg||`Ganaste ${totalWin.toLocaleString()} Gs`;
       dropCoinsGold();
       setTimeout(()=>cells.forEach(c=>c.classList.remove('win-cell')),2500);
     } else {
