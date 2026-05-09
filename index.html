@@ -867,7 +867,13 @@ function renderAdminPanel() {
       </div>
       ${badges.length ? `<div class="user-badge-row">${badges.join('')}</div>` : ''}
       <div class="user-bal">💰 ${(d.balance||0).toLocaleString()} Gs</div>
-      <div class="user-actions">
-        <button class="ua-btn success" onclick="adminCredit('${u}')">💰 Acreditar</button>
-        <button class="ua-btn danger" onclick="adminDeduct('${u}')">➖ Quitar saldo</button>
-        <button class="ua-btn ${d.blocked?'success':'danger'
+<div class="user-actions">
+  <button class="ua-btn success" onclick="adminCredit('${u}')">💰 Acreditar</button>
+  
+  <button class="ua-btn danger" onclick="adminDeduct('${u}')">➖ Quitar saldo</button>
+  
+  <button class="ua-btn ${d.blocked ? 'success' : 'danger'}"
+    onclick="toggleBlock('${u}')">
+    ${d.blocked ? '🔓 Desbloquear' : '🔒 Bloquear'}
+  </button>
+</div>
