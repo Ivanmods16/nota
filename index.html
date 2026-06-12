@@ -4,6 +4,8 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Blackstore — Importaciones Paraguay</title>
+  <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+  <script async src="https://pay.google.com/gp/p/js/pay.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -985,6 +987,8 @@ function renderStep(n) {
         <label class="form-label">Método de pago *</label>
         <select class="form-select" id="f-pago">
           <option value="">Seleccioná un método</option>
+          <option ${orderData.pago === "tarjeta" ? "selected" : ""} value="tarjeta">💳 Pagar con tarjeta (Stripe)</option>
+          <option ${orderData.pago === "googlepay" ? "selected" : ""} value="googlepay">Google Pay</option>
           <option ${orderData.pago === "transferencia" ? "selected" : ""} value="transferencia">Transferencia bancaria</option>
           <option ${orderData.pago === "billetera" ? "selected" : ""} value="billetera">Billetera digital (Tigo Money, Personal Pay)</option>
           <option ${orderData.pago === "efectivo" ? "selected" : ""} value="efectivo">Efectivo al recibir</option>
@@ -1036,39 +1040,111 @@ function renderStep(n) {
   }
 
   else if (n === 3) {
-    subtitle.textContent = "Subí tu comprobante de pago";
+    subtitle.textContent = "Elegí cómo querés pagar";
     body.innerHTML = `
-      <p style="font-size:14px;color:#555;margin-bottom:1.25rem;line-height:1.7;">
-        Para confirmar tu pedido, realizá el pago y subí el comprobante aquí.
-        Un gerente de <strong>Blackstore</strong> lo verificará y se comunicará con vos enseguida.
-      </p>
-      <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()"
-           ondragover="event.preventDefault();this.classList.add('drag')"
-           ondragleave="this.classList.remove('drag')"
-           ondrop="handleDrop(event)">
-        <div class="upload-icon">📄</div>
-        <div class="upload-title">Hacé clic o arrastrá tu comprobante</div>
-        <div class="upload-sub">JPG, PNG o PDF · Máximo 10MB</div>
-        <input type="file" id="fileInput" accept="image/*,.pdf" style="display:none" onchange="handleFile(this.files[0])">
+      <!-- TABS -->
+      <div style="display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap;">
+        <button id="tabStripe" onclick="switchPayTab('stripe')"
+          style="flex:1;min-width:100px;padding:10px 8px;border-radius:8px;border:2px solid var(--black);background:var(--black);color:#fff;font-weight:700;font-size:13px;cursor:pointer;">
+          💳 Tarjeta
+        </button>
+        <button id="tabGpay" onclick="switchPayTab('gpay')"
+          style="flex:1;min-width:100px;padding:10px 8px;border-radius:8px;border:2px solid var(--gray2);background:var(--white);color:var(--text);font-weight:700;font-size:13px;cursor:pointer;">
+          <img src="https://pay.google.com/about/static_kcs/images/logos/google-pay-logo.svg" alt="Google Pay" style="height:18px;vertical-align:middle;">
+        </button>
+        <button id="tabManual" onclick="switchPayTab('manual')"
+          style="flex:1;min-width:100px;padding:10px 8px;border-radius:8px;border:2px solid var(--gray2);background:var(--white);color:var(--text);font-weight:700;font-size:13px;cursor:pointer;">
+          📄 Transferencia
+        </button>
       </div>
-      <div class="upload-preview" id="uploadPreview">
-        <div class="preview-icon" id="previewIcon">📄</div>
-        <div>
-          <div class="preview-name" id="previewName"></div>
-          <div class="preview-size" id="previewSize"></div>
+
+      <!-- PANEL STRIPE -->
+      <div id="panelStripe">
+        <p style="font-size:13px;color:#555;margin-bottom:1.25rem;line-height:1.7;text-align:center;">
+          Pagá de forma segura con tu tarjeta de crédito o débito.<br>
+          <strong>Stripe</strong> procesa el pago — tus datos están 100% protegidos.
+        </p>
+        <div style="display:flex;justify-content:center;">
+          <stripe-buy-button
+            buy-button-id="buy_btn_1ThJvf3lUj81Q977vaahdMFP"
+            publishable-key="pk_test_51ThJc13lUj81Q977eidBQCnyKGfGkTR5yXylNGUWZ4sON1P9bHYrcWNDhZ5cOA3Iswqk7sSLvomRTUoxT1ofrXFj00AuIacVUB">
+          </stripe-buy-button>
         </div>
-        <button class="preview-remove" onclick="removeFile()">✕</button>
+        <p style="font-size:11px;color:#bbb;margin-top:1rem;text-align:center;">
+          Después del pago, un gerente coordina el envío por WhatsApp.
+        </p>
       </div>
-      <p style="font-size:12px;color:#aaa;margin-top:0.5rem;">
-        Si aún no realizaste el pago, podés hacerlo y subir el comprobante después contactándonos por WhatsApp.
-      </p>
+
+      <!-- PANEL GOOGLE PAY -->
+      <div id="panelGpay" style="display:none;">
+        <p style="font-size:13px;color:#555;margin-bottom:1.25rem;line-height:1.7;text-align:center;">
+          Pagá rápido con tu cuenta de Google.<br>Sin ingresar datos de tarjeta.
+        </p>
+        <div id="gpayBtnWrap" style="display:flex;justify-content:center;margin-bottom:1rem;"></div>
+        <p id="gpayNotAvail" style="display:none;text-align:center;font-size:13px;color:#e74c3c;">
+          Google Pay no está disponible en este dispositivo o navegador.
+        </p>
+        <p style="font-size:11px;color:#bbb;margin-top:0.5rem;text-align:center;">
+          Después del pago, un gerente coordina el envío por WhatsApp.
+        </p>
+      </div>
+
+      <!-- PANEL TRANSFERENCIA -->
+      <div id="panelManual" style="display:none;">
+        <p style="font-size:14px;color:#555;margin-bottom:1.25rem;line-height:1.7;">
+          Realizá la transferencia y subí el comprobante aquí.
+          Un gerente de <strong>Blackstore</strong> lo verificará y se comunicará con vos enseguida.
+        </p>
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()"
+             ondragover="event.preventDefault();this.classList.add('drag')"
+             ondragleave="this.classList.remove('drag')"
+             ondrop="handleDrop(event)">
+          <div class="upload-icon">📄</div>
+          <div class="upload-title">Hacé clic o arrastrá tu comprobante</div>
+          <div class="upload-sub">JPG, PNG o PDF · Máximo 10MB</div>
+          <input type="file" id="fileInput" accept="image/*,.pdf" style="display:none" onchange="handleFile(this.files[0])">
+        </div>
+        <div class="upload-preview" id="uploadPreview">
+          <div class="preview-icon" id="previewIcon">📄</div>
+          <div>
+            <div class="preview-name" id="previewName"></div>
+            <div class="preview-size" id="previewSize"></div>
+          </div>
+          <button class="preview-remove" onclick="removeFile()">✕</button>
+        </div>
+        <p style="font-size:12px;color:#aaa;margin-top:0.5rem;">
+          Si aún no realizaste el pago, podés contactarnos por WhatsApp.
+        </p>
+      </div>
     `;
     footer.innerHTML = `
-      <div class="modal-actions">
-        <button class="btn-back" onclick="renderStep(2)">← Volver</button>
-        <button class="btn-next" id="btnSend" onclick="submitOrder()">Enviar pedido ✓</button>
+      <div id="footerManual" style="display:none;">
+        <div class="modal-actions">
+          <button class="btn-back" onclick="renderStep(2)">← Volver</button>
+          <button class="btn-next" id="btnSend" onclick="submitOrder()">Enviar pedido ✓</button>
+        </div>
+      </div>
+      <div id="footerStripe" style="display:none;">
+        <div class="modal-actions">
+          <button class="btn-back" onclick="renderStep(2)" style="width:100%;">← Volver al resumen</button>
+        </div>
+      </div>
+      <div id="footerGpay" style="display:none;">
+        <div class="modal-actions">
+          <button class="btn-back" onclick="renderStep(2)" style="width:100%;">← Volver al resumen</button>
+        </div>
       </div>`;
+
+    // Tab por defecto según método elegido en paso 1
+    if (orderData.pago === 'tarjeta') {
+      switchPayTab('stripe');
+    } else if (orderData.pago === 'googlepay') {
+      switchPayTab('gpay');
+    } else {
+      switchPayTab('manual');
+    }
   }
+
 
   else if (n === 4) {
     subtitle.textContent = "¡Tu pedido fue enviado!";
@@ -1112,6 +1188,105 @@ function goStep2() {
     notas: document.getElementById("f-notas").value.trim()
   };
   renderStep(2);
+}
+
+function switchPayTab(tab) {
+  const panels  = { stripe: 'panelStripe', gpay: 'panelGpay', manual: 'panelManual' };
+  const footers = { stripe: 'footerStripe', gpay: 'footerGpay', manual: 'footerManual' };
+  const btns    = { stripe: 'tabStripe', gpay: 'tabGpay', manual: 'tabManual' };
+  const activeStyle   = 'flex:1;min-width:100px;padding:10px 8px;border-radius:8px;border:2px solid var(--black);background:var(--black);color:#fff;font-weight:700;font-size:13px;cursor:pointer;';
+  const inactiveStyle = 'flex:1;min-width:100px;padding:10px 8px;border-radius:8px;border:2px solid var(--gray2);background:var(--white);color:var(--text);font-weight:700;font-size:13px;cursor:pointer;';
+
+  Object.keys(panels).forEach(t => {
+    const p = document.getElementById(panels[t]);
+    const f = document.getElementById(footers[t]);
+    const b = document.getElementById(btns[t]);
+    if (p) p.style.display  = t === tab ? 'block' : 'none';
+    if (f) f.style.display  = t === tab ? 'block' : 'none';
+    if (b) b.style.cssText  = t === tab ? activeStyle : inactiveStyle;
+  });
+
+  // Inicializar Google Pay cuando se selecciona ese tab
+  if (tab === 'gpay') initGooglePay();
+}
+
+// ── GOOGLE PAY ──
+function initGooglePay() {
+  const wrap = document.getElementById('gpayBtnWrap');
+  const notAvail = document.getElementById('gpayNotAvail');
+  if (!wrap || wrap.querySelector('button')) return; // ya inicializado
+
+  const paymentsClient = new google.payments.api.PaymentsClient({
+    environment: 'TEST' // cambiar a 'PRODUCTION' cuando tengas cuenta aprobada
+  });
+
+  const baseRequest = { apiVersion: 2, apiVersionMinor: 0 };
+
+  const allowedCardNetworks = ["AMEX","DISCOVER","INTERAC","JCB","MASTERCARD","VISA"];
+  const allowedCardAuthMethods = ["PAN_ONLY","CRYPTOGRAM_3DS"];
+
+  const tokenizationSpec = {
+    type: 'PAYMENT_GATEWAY',
+    parameters: {
+      gateway: 'stripe',
+      'stripe:version': '2023-10-16',
+      'stripe:publishableKey': 'pk_test_51ThJc13lUj81Q977eidBQCnyKGfGkTR5yXylNGUWZ4sON1P9bHYrcWNDhZ5cOA3Iswqk7sSLvomRTUoxT1ofrXFj00AuIacVUB'
+    }
+  };
+
+  const cardPaymentMethod = {
+    type: 'CARD',
+    parameters: { allowedAuthMethods: allowedCardAuthMethods, allowedCardNetworks },
+    tokenizationSpecification: tokenizationSpec
+  };
+
+  const isReadyRequest = { ...baseRequest, allowedPaymentMethods: [{ type: 'CARD', parameters: { allowedAuthMethods: allowedCardAuthMethods, allowedCardNetworks } }] };
+
+  paymentsClient.isReadyToPay(isReadyRequest).then(res => {
+    if (!res.result) {
+      if (wrap) wrap.style.display = 'none';
+      if (notAvail) notAvail.style.display = 'block';
+      return;
+    }
+    const btn = paymentsClient.createButton({
+      onClick: () => onGooglePayPressed(paymentsClient, cardPaymentMethod),
+      buttonType: 'buy',
+      buttonColor: 'black',
+      buttonSizeMode: 'fill'
+    });
+    wrap.appendChild(btn);
+  }).catch(() => {
+    if (notAvail) notAvail.style.display = 'block';
+  });
+}
+
+function onGooglePayPressed(paymentsClient, cardPaymentMethod) {
+  const total = cartTotal();
+  const paymentDataRequest = {
+    apiVersion: 2, apiVersionMinor: 0,
+    allowedPaymentMethods: [cardPaymentMethod],
+    transactionInfo: {
+      countryCode: 'PY',
+      currencyCode: 'PYG',
+      totalPriceStatus: 'FINAL',
+      totalPrice: String(total),
+      totalPriceLabel: 'Total'
+    },
+    merchantInfo: {
+      merchantName: 'Blackstore',
+      merchantId: 'BCR2DN4TR3ZPTTLZ' // reemplazá con tu Merchant ID de Google Pay
+    }
+  };
+
+  paymentsClient.loadPaymentData(paymentDataRequest).then(data => {
+    // Pago aprobado por Google Pay — registrar pedido
+    orderData.gpayToken = JSON.stringify(data.paymentMethodData.tokenizationData);
+    submitOrder();
+  }).catch(err => {
+    if (err.statusCode !== 'CANCELED') {
+      alert('Error en Google Pay. Intentá con otra opción.');
+    }
+  });
 }
 
 function handleFile(file) {
